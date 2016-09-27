@@ -364,10 +364,10 @@ monte_carlo_genmove(int color, int allowed_moves[BOARDMAX],
       best_move = pos;
       best_value = potential_moves[pos];
 
-	  DEBUG(DEBUG_MONTECARLO, "accept non-mc move:%1m value:%f "
-	        "because frequency:%d value:%f cutoff:%d cutoff2:%d\n",
-	        best_move, best_value, move_frequencies[pos], move_values[pos],
-	        frequency_cutoff, frequency_cutoff2);
+      DEBUG(DEBUG_MONTECARLO, "accept non-mc move:%1m value:%f "
+            "because frequency:%d value:%f cutoff:%d cutoff2:%d\n",
+            best_move, best_value, move_frequencies[pos], move_values[pos],
+            frequency_cutoff, frequency_cutoff2);
     }
   }
 

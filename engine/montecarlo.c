@@ -2186,7 +2186,7 @@ uct_genmove(int color, int *move, int *forbidden_moves, int *allowed_moves,
   /* Print information about the search tree. */
   if (debug & DEBUG_MONTECARLO) {
 
-	DEBUG(DEBUG_MONTECARLO, "   win  game rate mean std   mean/std\n");
+    DEBUG(DEBUG_MONTECARLO, "   win  game rate mean std   mean/std\n");
 
     while (1) {
       float mean;
@@ -2212,9 +2212,9 @@ uct_genmove(int color, int *move, int *forbidden_moves, int *allowed_moves,
       std = sqrt((most_games_node->sum_scores2 - most_games_node->sum_scores * mean) / (most_games_node->games - 1));
       DEBUG(DEBUG_MONTECARLO, "%1m ", most_games_arc->move);
       DEBUG(DEBUG_MONTECARLO, "%d %d %f %f %f %f\n",
-	      most_games_node->wins, most_games_node->games,
-	      (float) most_games_node->wins / most_games_node->games,
-	      mean, std, mean / (std + 0.001));
+            most_games_node->wins, most_games_node->games,
+            (float) most_games_node->wins / most_games_node->games,
+            mean, std, mean / (std + 0.001));
       most_games_node->games = -most_games_node->games;
     }
     for (arc = tree.nodes[0].child; arc; arc = arc->next)
