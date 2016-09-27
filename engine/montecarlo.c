@@ -2013,8 +2013,7 @@ uct_traverse_tree(struct uct_tree *tree, struct uct_node *node,
   else {
     struct uct_node *next_node;
     next_node = uct_play_move(tree, node, alpha, &gamma, &move);
-    
-    gamma += 0.00;
+
     if (gamma > 0.8)
       gamma = 0.8;
     result = uct_traverse_tree(tree, next_node, beta, gamma);
@@ -2107,7 +2106,7 @@ uct_genmove(int color, int *move, int *forbidden_moves, int *allowed_moves,
 	    int nodes, float *move_values, int *move_frequencies)
 {
   struct uct_tree tree;
-  float best_score;
+  int best_score;
   struct uct_arc *arc;
   struct uct_node *node;
   struct mc_game starting_position;
@@ -2159,15 +2158,15 @@ uct_genmove(int color, int *move, int *forbidden_moves, int *allowed_moves,
   }
 
   /* Identify the best move on the top level. */
-  best_score = 0.0;
+  best_score = 0;
   *move = PASS_MOVE;
   for (arc = tree.nodes[0].child; arc; arc = arc->next) {
     node = arc->node;
     move_frequencies[arc->move] = node->games;
     move_values[arc->move] = (float) node->wins / node->games;
-    if (best_score * node->games < node->wins) {
+    if (best_score < node->wins) {
       *move = arc->move;
-      best_score = (float) node->wins / node->games;
+      best_score = node->wins;
     }
   }
 
