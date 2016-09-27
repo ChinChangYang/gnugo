@@ -34,9 +34,6 @@
 #include "random.h"
 #include <math.h>
 
-/* FIXME: Replace with a DEBUG_MC symbol for use with -d. */
-static int mc_debug = 0;
-
 #define TURN_OFF_ASSERTIONS 1
 
 
@@ -1559,7 +1556,7 @@ mc_generate_random_move(struct mc_game *game)
    * FIXME: Handle this in some proper way.
    */
   if (depth > 600) {
-    if (mc_debug) {
+    if (debug & DEBUG_MONTECARLO) {
       int pos;
       fprintf(stderr, "Reached 600 iterations.\n");
       mc_showboard(mc, stderr);
@@ -2187,7 +2184,10 @@ uct_genmove(int color, int *move, int *forbidden_moves, int *allowed_moves,
     uct_dump_tree(&tree, "/tmp/ucttree.sgf", color, 50);
     
   /* Print information about the search tree. */
-  if (mc_debug) {
+  if (debug & DEBUG_MONTECARLO) {
+
+	DEBUG(DEBUG_MONTECARLO, "   win  game rate mean std   mean/std\n");
+
     while (1) {
       float mean;
       float std;
@@ -2210,8 +2210,8 @@ uct_genmove(int color, int *move, int *forbidden_moves, int *allowed_moves,
       
       mean = most_games_node->sum_scores / most_games_node->games;
       std = sqrt((most_games_node->sum_scores2 - most_games_node->sum_scores * mean) / (most_games_node->games - 1));
-      gprintf("%1m ", most_games_arc->move);
-      fprintf(stderr, "%6d %6d %5.3f %5.3f %5.3f %5.3f\n",
+      DEBUG(DEBUG_MONTECARLO, "%1m ", most_games_arc->move);
+      DEBUG(DEBUG_MONTECARLO, "%d %d %f %f %f %f\n",
 	      most_games_node->wins, most_games_node->games,
 	      (float) most_games_node->wins / most_games_node->games,
 	      mean, std, mean / (std + 0.001));
@@ -2225,20 +2225,20 @@ uct_genmove(int color, int *move, int *forbidden_moves, int *allowed_moves,
       struct uct_arc *arcs[7];
       int depth = 0;
       n = uct_find_best_children(&tree.nodes[0], arcs, 7);
-      gprintf("Principal variation:\n");
+      DEBUG(DEBUG_MONTECARLO, "Principal variation:\n");
       while (n > 0 && depth < 80) {
 	int k;
-	gprintf("%C ", color);
+	DEBUG(DEBUG_MONTECARLO, "%C ", color);
 	for (k = 0; k < n; k++) {
 	  node = arcs[k]->node;
-	  gprintf("%1m ", arcs[k]->move);
-	  fprintf(stderr, "%5.3f", (float) node->wins / node->games);
+	  DEBUG(DEBUG_MONTECARLO, "%1m ", arcs[k]->move);
+	  DEBUG(DEBUG_MONTECARLO, "%f", (float) node->wins / node->games);
 	  if (k == 0)
-	    gprintf(" (%d games)", node->games);
+	    DEBUG(DEBUG_MONTECARLO, " (%d games)", node->games);
 	  if (k < n - 1)
-	    gprintf(", ");
+	    DEBUG(DEBUG_MONTECARLO, ", ");
 	}
-	gprintf("\n");
+	DEBUG(DEBUG_MONTECARLO, "\n");
 	color = OTHER_COLOR(color);
 	n = uct_find_best_children(arcs[0]->node, arcs, 7);
 	depth++;

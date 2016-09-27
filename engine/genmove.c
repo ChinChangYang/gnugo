@@ -347,6 +347,8 @@ monte_carlo_genmove(int color, int allowed_moves[BOARDMAX],
   uct_genmove(color, &best_uct_move, forbidden_move, allowed_moves,
 	      number_of_simulations, move_values, move_frequencies);
 
+  DEBUG(DEBUG_MONTECARLO, "uct best move:%1m\n", best_uct_move);
+
   best_move = best_uct_move;
   best_value = 0.0;
   frequency_cutoff = move_frequencies[best_uct_move] / 2;
@@ -361,6 +363,11 @@ monte_carlo_genmove(int color, int allowed_moves[BOARDMAX],
 	&& potential_moves[pos] > best_value) {
       best_move = pos;
       best_value = potential_moves[pos];
+
+	  DEBUG(DEBUG_MONTECARLO, "accept non-mc move:%1m value:%f "
+	        "because frequency:%d value:%f cutoff:%d cutoff2:%d\n",
+	        best_move, best_value, move_frequencies[pos], move_values[pos],
+	        frequency_cutoff, frequency_cutoff2);
     }
   }
 
@@ -510,8 +517,8 @@ do_genmove(int color, float pure_threat_value,
 
   /* Review the move reasons and estimate move values. */
   if (review_move_reasons(&move, value, color, 
-			  pure_threat_value, pessimistic_score, allowed_moves,
-			  use_thrashing_dragon_heuristics))
+                          pure_threat_value, pessimistic_score, allowed_moves,
+                          use_thrashing_dragon_heuristics))
     TRACE("Move generation likes %1m with value %f\n", move, *value);
   gg_assert(stackp == 0);
   time_report(1, "review move reasons", NO_MOVE, 1.0);
@@ -562,16 +569,19 @@ do_genmove(int color, float pure_threat_value,
     int pos;
     for (pos = BOARDMIN; pos < BOARDMAX; pos++)
       if (ON_BOARD(pos)
-	  && (!allowed_moves || allowed_moves[pos])
-	  && is_allowed_move(pos, color)) {
-	allowed_moves2[pos] = 1;
-	num_allowed_moves2++;
+          && (!allowed_moves || allowed_moves[pos])
+          && is_allowed_move(pos, color)) {
+        allowed_moves2[pos] = 1;
+        num_allowed_moves2++;
       }
-      else
-	allowed_moves2[pos] = 0;
-    
+    else
+      allowed_moves2[pos] = 0;
+
     if (num_allowed_moves2 > 1)
+    {
       move = monte_carlo_genmove(color, allowed_moves2, value, resign);
+      TRACE("Monte carlo genmove %1m with value %f\n", move, *value);
+    }
   }
   
   /* If still no move, fill a remaining liberty. This should pick up
