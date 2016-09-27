@@ -347,7 +347,8 @@ monte_carlo_genmove(int color, int allowed_moves[BOARDMAX],
   uct_genmove(color, &best_uct_move, forbidden_move, allowed_moves,
 	      number_of_simulations, move_values, move_frequencies);
 
-  DEBUG(DEBUG_MONTECARLO, "uct best move:%1m\n", best_uct_move);
+  DEBUG(DEBUG_MONTECARLO, "uct best move %1m with value %f\n",
+        best_uct_move, move_values[best_uct_move]);
 
   best_move = best_uct_move;
   best_value = 0.0;
@@ -364,7 +365,7 @@ monte_carlo_genmove(int color, int allowed_moves[BOARDMAX],
       best_move = pos;
       best_value = potential_moves[pos];
 
-      DEBUG(DEBUG_MONTECARLO, "accept non-mc move:%1m value:%f "
+      DEBUG(DEBUG_MONTECARLO, "prefer non-mc move %1m with value %f "
             "because frequency:%d value:%f cutoff:%d cutoff2:%d\n",
             best_move, best_value, move_frequencies[pos], move_values[pos],
             frequency_cutoff, frequency_cutoff2);
