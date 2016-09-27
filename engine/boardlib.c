@@ -39,7 +39,7 @@ Intersection initial_board[BOARDSIZE];
 int          initial_board_ko_pos;
 int          initial_white_captured;
 int          initial_black_captured;
-int          initial_consecutive_passes;D
+int          initial_consecutive_passes;
 int          move_history_color[MAX_MOVE_HISTORY];
 int          move_history_pos[MAX_MOVE_HISTORY];
 Hash_data    move_history_hash[MAX_MOVE_HISTORY];
