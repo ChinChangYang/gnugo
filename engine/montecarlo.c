@@ -1521,7 +1521,6 @@ struct mc_game {
   int color_to_move;
   int last_move;
   int consecutive_passes;
-  int consecutive_ko_captures;
   int depth;
 };
 
@@ -1689,11 +1688,6 @@ static int mc_play_random_move(struct mc_game *game, int move)
     else {
       game->consecutive_passes = 0;
     }
-      
-    if (game->mc.board_ko_pos != NO_MOVE)
-      game->consecutive_ko_captures++;
-    else
-      game->consecutive_ko_captures = 0;
 
     game->move_history[game->depth] = move;
     game->last_move = move;
@@ -2125,9 +2119,7 @@ uct_genmove(int color, int *move, int *forbidden_moves, int *allowed_moves,
   mc_init_board_from_global_board(&starting_position.mc);
   mc_init_move_values(&starting_position.mc);
   starting_position.color_to_move = color;
-  /* FIXME: Fill in correct information. */
-  starting_position.consecutive_passes = 0;
-  starting_position.consecutive_ko_captures = 0;
+  starting_position.consecutive_passes = consecutive_passes;
   starting_position.last_move = get_last_move();
   starting_position.depth = 0;
   for (pos = BOARDMIN; pos < BOARDMAX; pos++)

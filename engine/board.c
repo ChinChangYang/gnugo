@@ -355,10 +355,12 @@ store_board(struct board_state *state)
   state->board_ko_pos = board_ko_pos;
   state->white_captured = white_captured;
   state->black_captured = black_captured;
+  state->consecutive_passes = consecutive_passes;
   
   state->initial_board_ko_pos = initial_board_ko_pos;
   state->initial_white_captured = initial_white_captured;
   state->initial_black_captured = initial_black_captured;
+  state->initial_consecutive_passes = initial_consecutive_passes;
   
   state->move_history_pointer = move_history_pointer;
   for (k = 0; k < move_history_pointer; k++) {
@@ -392,10 +394,12 @@ restore_board(struct board_state *state)
   board_ko_pos = state->board_ko_pos;
   white_captured = state->white_captured;
   black_captured = state->black_captured;
+  state->consecutive_passes = consecutive_passes;
   
-  initial_board_ko_pos = state->initial_board_ko_pos;
-  initial_white_captured = state->initial_white_captured;
-  initial_black_captured = state->initial_black_captured;
+  state->initial_board_ko_pos = initial_board_ko_pos;
+  state->initial_white_captured = initial_white_captured;
+  state->initial_black_captured = initial_black_captured;
+  state->initial_consecutive_passes = initial_consecutive_passes;
   
   move_history_pointer = state->move_history_pointer;
   for (k = 0; k < move_history_pointer; k++) {
@@ -436,6 +440,7 @@ clear_board(void)
   board_ko_pos = NO_MOVE;
   white_captured = 0;
   black_captured = 0;
+  consecutive_passes = 0;
 
   komaster = EMPTY;
   kom_pos = NO_MOVE;
@@ -443,6 +448,7 @@ clear_board(void)
   initial_board_ko_pos = NO_MOVE;
   initial_white_captured = 0;
   initial_black_captured = 0;
+  initial_consecutive_passes = 0;
 
   move_history_pointer = 0;
   movenum = 0;
@@ -642,6 +648,9 @@ really_do_trymove(int pos, int color)
     PUSH_VALUE(white_captured);
     do_play_move(pos, color);
   }
+  else {
+    consecutive_passes++;
+  }
 }
 
 /*
@@ -817,6 +826,7 @@ reset_move_history(void)
   initial_board_ko_pos = board_ko_pos;
   initial_white_captured = white_captured;
   initial_black_captured = black_captured;
+  initial_consecutive_passes = consecutive_passes;
   move_history_pointer = 0;
 }
 
@@ -895,6 +905,10 @@ play_move_no_history(int pos, int color, int update_internals)
     gg_assert(hashdata_is_equal(oldkey, board_hash));
 #endif
   }
+  else
+  {
+    consecutive_passes++;
+  }
 
   if (update_internals || next_string == MAX_STRINGS)
     new_position();
@@ -912,6 +926,7 @@ replay_move_history(int n)
   board_ko_pos = initial_board_ko_pos;
   white_captured = initial_white_captured;
   black_captured = initial_black_captured;
+  consecutive_passes = initial_consecutive_passes;
   new_position();
 
   for (k = 0; k < n; k++)
@@ -953,6 +968,7 @@ play_move(int pos, int color)
     int saved_board_ko_pos = board_ko_pos;
     int saved_white_captured = white_captured;
     int saved_black_captured = black_captured;
+    int saved_consecutive_passes = consecutive_passes;
     memcpy(saved_board, board, sizeof(board));
 
     replay_move_history(number_collapsed_moves);
@@ -961,6 +977,7 @@ play_move(int pos, int color)
     initial_board_ko_pos = board_ko_pos;
     initial_white_captured = white_captured;
     initial_black_captured = black_captured;
+    initial_consecutive_passes = consecutive_passes;
 
     for (k = number_collapsed_moves; k < move_history_pointer; k++) {
       move_history_color[k - number_collapsed_moves] = move_history_color[k];
@@ -973,6 +990,7 @@ play_move(int pos, int color)
     board_ko_pos = saved_board_ko_pos;
     white_captured = saved_white_captured;
     black_captured = saved_black_captured;
+    consecutive_passes = saved_consecutive_passes;
     new_position();
   }
 

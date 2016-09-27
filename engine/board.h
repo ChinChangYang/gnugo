@@ -189,11 +189,13 @@ extern Intersection board[BOARDSIZE];       /* go board */
 extern int          board_ko_pos;
 extern int          black_captured;   /* num. of black stones captured */
 extern int          white_captured;
+extern int          consecutive_passes;
 
 extern Intersection initial_board[BOARDSIZE];
 extern int          initial_board_ko_pos;
 extern int          initial_white_captured;
 extern int          initial_black_captured;
+extern int          initial_consecutive_passes;
 extern int          move_history_color[MAX_MOVE_HISTORY];
 extern int          move_history_pos[MAX_MOVE_HISTORY];
 extern Hash_data    move_history_hash[MAX_MOVE_HISTORY];
@@ -234,11 +236,13 @@ struct board_state {
   int board_ko_pos;
   int black_captured;
   int white_captured;
+  int consecutive_passes;
 
   Intersection initial_board[BOARDSIZE];
   int initial_board_ko_pos;
   int initial_white_captured;
   int initial_black_captured;
+  int initial_consecutive_passes;
   int move_history_color[MAX_MOVE_HISTORY];
   int move_history_pos[MAX_MOVE_HISTORY];
   Hash_data move_history_hash[MAX_MOVE_HISTORY];
