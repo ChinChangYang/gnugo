@@ -394,13 +394,13 @@ restore_board(struct board_state *state)
   board_ko_pos = state->board_ko_pos;
   white_captured = state->white_captured;
   black_captured = state->black_captured;
-  state->consecutive_passes = consecutive_passes;
-  
-  state->initial_board_ko_pos = initial_board_ko_pos;
-  state->initial_white_captured = initial_white_captured;
-  state->initial_black_captured = initial_black_captured;
-  state->initial_consecutive_passes = initial_consecutive_passes;
-  
+  consecutive_passes = state->consecutive_passes;
+
+  initial_board_ko_pos = state->initial_board_ko_pos;
+  initial_white_captured = state->initial_white_captured;
+  initial_black_captured = state->initial_black_captured;
+  initial_consecutive_passes = state->initial_consecutive_passes;
+
   move_history_pointer = state->move_history_pointer;
   for (k = 0; k < move_history_pointer; k++) {
     move_history_color[k] = state->move_history_color[k];
