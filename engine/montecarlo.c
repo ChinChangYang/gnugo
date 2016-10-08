@@ -1905,6 +1905,61 @@ uct_finish_and_score_game(struct mc_game *game)
   return komi + mc_play_random_game(game);
 }
 
+static float
+uct_calc_value(struct uct_tree *tree, struct uct_node *node,
+               struct uct_arc *child_arc, float winrate)
+{
+  float uct_value;
+
+#if 1 // variant of PUCT algorithm
+  struct uct_node *child_node;
+  struct mc_game *game;
+  struct mc_board *mc;
+  int color;
+  unsigned int *move_values;
+  unsigned int *move_value_sum;
+  float prior;
+
+  // calc prior
+  {
+    game = &tree->game;
+    mc = &game->mc;
+    color = game->color_to_move;
+
+    if (color == WHITE) {
+      move_values = mc->move_values_white;
+      move_value_sum = &mc->move_value_sum_white;
+    }
+    else {
+      move_values = mc->move_values_black;
+      move_value_sum = &mc->move_value_sum_black;
+    }
+
+    prior = (float) move_values[child_arc->move] / (*move_value_sum);
+  }
+
+  child_node = child_arc->node;
+  uct_value = winrate
+    + 5.0 * prior * sqrt(node->games) / (1 + child_node->games);
+  
+#else // gnugo 3.9.1 montecarlo
+  struct uct_node *child_node;
+  float log_games_ratio;
+  float x;
+
+  log_games_ratio = log(node->games) / child_node->games;
+  x = winrate * (1.0 - winrate) + sqrt(2.0 * log_games_ratio);
+
+  if (x < 0.25)
+    x = 0.25;
+
+  uct_value = winrate + sqrt(2 * log_games_ratio * x / (1 + tree->game.depth));
+
+#endif
+
+  return uct_value;
+}
+
 static struct uct_node *
 uct_play_move(struct uct_tree *tree, struct uct_node *node, float alpha,
 	      float *gamma, int *move)
@@ -1915,16 +1970,14 @@ uct_play_move(struct uct_tree *tree, struct uct_node *node, float alpha,
   struct uct_arc *best_winrate_arc = NULL;
   float best_uct_value = 0.0;
   float best_winrate = 0.0;
-  
+
   for (child_arc = node->child; child_arc; child_arc = child_arc->next) {
     struct uct_node *child_node = child_arc->node;
     float winrate = (float) child_node->wins / child_node->games;
     float uct_value;
-    float log_games_ratio = log(node->games) / child_node->games;
-    float x = winrate * (1.0 - winrate) + sqrt(2.0 * log_games_ratio);
-    if (x < 0.25)
-      x = 0.25;
-    uct_value = winrate + sqrt(2 * log_games_ratio * x / (1 + tree->game.depth));
+
+    uct_value = uct_calc_value(tree, node, child_arc, winrate);
+
     if (uct_value > best_uct_value) {
       next_arc = child_arc;
       best_uct_value = uct_value;
@@ -2032,26 +2085,41 @@ uct_traverse_tree(struct uct_tree *tree, struct uct_node *node,
   return result;
 }
 
+/* 
+ * Determine new uct arc is better than the old one.
+ *
+ * Return 1 if new uct arc is better than the old one.
+ * Return 0 otherwise.
+ * 
+ * Arc score is evaluated by number of win games.
+ */
+static int
+uct_is_better_arc(struct uct_arc *old, struct uct_arc *new)
+{
+  if (NULL == old)
+    return 1;
+  else if (NULL == new)
+    return 0;
+  else
+    return new->node->wins > old->node->wins; 
+}
+
 static int
 uct_find_best_children(struct uct_node *node, struct uct_arc **children,
 		       int n)
 {
   struct uct_arc *child_arc;
-  float best_score;
   struct uct_arc *best_child;
   int found_moves[BOARDMAX];
   int k;
 
   memset(found_moves, 0, sizeof(found_moves));
   for (k = 0; k < n; k++) {
-    best_score = 0.0;
     best_child = NULL;
     for (child_arc = node->child; child_arc; child_arc = child_arc->next) {
-      struct uct_node *child_node = child_arc->node;
       if (!found_moves[child_arc->move]
-	  && best_score * child_node->games < child_node->wins) {
+	  && uct_is_better_arc(best_child, child_arc)) {
 	best_child = child_arc;
-	best_score = (float) child_node->wins / child_node->games;
       }
     }
     if (!best_child)
@@ -2106,7 +2174,7 @@ uct_genmove(int color, int *move, int *forbidden_moves, int *allowed_moves,
 	    int nodes, float *move_values, int *move_frequencies)
 {
   struct uct_tree tree;
-  int best_score;
+  struct uct_arc *best_child;
   struct uct_arc *arc;
   struct uct_node *node;
   struct mc_game starting_position;
@@ -2158,15 +2226,15 @@ uct_genmove(int color, int *move, int *forbidden_moves, int *allowed_moves,
   }
 
   /* Identify the best move on the top level. */
-  best_score = 0;
+  best_child = NULL;
   *move = PASS_MOVE;
   for (arc = tree.nodes[0].child; arc; arc = arc->next) {
     node = arc->node;
     move_frequencies[arc->move] = node->games;
     move_values[arc->move] = (float) node->wins / node->games;
-    if (best_score < node->wins) {
+    if (uct_is_better_arc(best_child, arc)) {
       *move = arc->move;
-      best_score = node->wins;
+      best_child = arc;
     }
   }
 
