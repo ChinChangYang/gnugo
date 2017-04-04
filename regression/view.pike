@@ -1621,7 +1621,7 @@ class Controller
     {
 	string new_engine_path = engine_path_entry->get_text();
 	if (!Stdio.is_file(new_engine_path)) {
-	    viewers->clist->set_text("The engine path does not point to a file.", -1);
+	    viewers->clist->set_text("The engine path does not point to a file.");
 	    return;
 	}
 	
