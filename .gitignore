@@ -19,3 +19,6 @@ autom4te.cache
 
 # CMake build directory.
 build/
+
+# macOS metadata files.
+.DS_Store
