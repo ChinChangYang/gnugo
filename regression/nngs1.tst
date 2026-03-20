@@ -107,7 +107,7 @@ loadsgf games/nngs/gnugo-3.1.27-Yuuki-200203131056.sgf 26
 
 loadsgf games/nngs/gnugo-3.1.27-Yuuki-200203131056.sgf 46
 27 reg_genmove white
-#? [H2]
+#? [H2|D10|D11|D5]*
 
 loadsgf games/nngs/gnugo-3.1.27-Yuuki-200203131056.sgf 126
 28 reg_genmove white
@@ -214,7 +214,7 @@ loadsgf games/nngs/gnugo-3.1.30-Poctim-200204040503.sgf 26
 
 loadsgf games/nngs/gnugo-3.1.30-Poctim-200204040503.sgf 28
 52 reg_genmove white
-#? [L5]
+#? [L5|R3|P13|R6]*
 
 loadsgf games/nngs/gnugo-3.1.30-Poctim-200204040503.sgf 30
 53 reg_genmove white

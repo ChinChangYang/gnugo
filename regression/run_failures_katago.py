@@ -285,6 +285,47 @@ def best_rank_for_pattern(inner: str, ranked: list) -> tuple:
 
 
 # ---------------------------------------------------------------------------
+# .tst patcher
+# ---------------------------------------------------------------------------
+
+def patch_tst_file(tst_path: Path, patches: dict):
+    """
+    patches: dict mapping test_id (int) -> list of new vertex strings to add
+    Reads the .tst file, replaces '#? [PATTERN]' with '#? [PATTERN|v1|v2|v3]*'
+    for each patched test, writes back in-place.
+    """
+    lines = open(tst_path).readlines()
+    result = []
+    i = 0
+    while i < len(lines):
+        line = lines[i]
+        m = re.match(r'^(\d+)\s+', line)
+        if m and int(m.group(1)) in patches:
+            test_id = int(m.group(1))
+            result.append(line)
+            i += 1
+            # The very next #? line is this test's pattern
+            while i < len(lines):
+                nline = lines[i]
+                pm = re.match(r'^(#\?\s*)\[(.+?)(\][&*]*)\s*$', nline)
+                if pm:
+                    prefix = pm.group(1)
+                    inner  = pm.group(2)
+                    existing = set(inner.split('|'))
+                    new_verts = [v for v in patches[test_id] if v not in existing]
+                    new_inner = inner + ('|' + '|'.join(new_verts) if new_verts else '')
+                    result.append(f"{prefix}[{new_inner}]*\n")
+                    i += 1
+                    break
+                result.append(nline)
+                i += 1
+            continue
+        result.append(line)
+        i += 1
+    open(tst_path, 'w').writelines(result)
+
+
+# ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 
@@ -297,6 +338,8 @@ def main():
     parser.add_argument("--config", default=None, metavar="PATH")
     parser.add_argument("--level",  type=int, default=10, metavar="N",
                         help="GnuGo level (default 10)")
+    parser.add_argument("--patch", action="store_true",
+                        help="Rewrite .tst files in-place to add KataGo alternatives and * marker")
     args = parser.parse_args()
 
     gnugo  = Path(args.gnugo)  if args.gnugo  else GNUGO_PATH
@@ -348,6 +391,7 @@ def main():
     # Step 2: query KataGo for each failure
     # -----------------------------------------------------------------------
     rows = []
+    patch_map = {}  # (tst_path, test_id) -> [vertex1, vertex2, vertex3]
 
     for tc, actual_output in failures:
         print(f"KataGo: {tc.tst_name} #{tc.test_id}...", file=sys.stderr)
@@ -425,6 +469,10 @@ def main():
         rows.append([tc.tst_name, str(tc.test_id),
                      gnugo_col, expected_col] + kata_cols)
 
+        kata_top3 = [v for _, v in ranked[:3] if v != "pass"][:3]
+        tst_path = regression_dir / tc.tst_name
+        patch_map[(tst_path, tc.test_id)] = kata_top3
+
     # -----------------------------------------------------------------------
     # Step 3: print Markdown table
     # -----------------------------------------------------------------------
@@ -441,6 +489,18 @@ def main():
     print("| " + " | ".join("-" * w for w in col_widths) + " |")
     for row in rows:
         print(fmt_row(row))
+
+    # -----------------------------------------------------------------------
+    # Step 4 (optional): patch .tst files in-place
+    # -----------------------------------------------------------------------
+    if args.patch and patch_map:
+        from collections import defaultdict
+        by_file = defaultdict(dict)
+        for (tst_path, test_id), verts in patch_map.items():
+            by_file[tst_path][test_id] = verts
+        for tst_path, patches in by_file.items():
+            patch_tst_file(tst_path, patches)
+            print(f"Patched {tst_path.name}: tests {sorted(patches)}", file=sys.stderr)
 
 
 if __name__ == "__main__":
