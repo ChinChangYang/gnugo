@@ -72,7 +72,7 @@ static void compute_scores(int use_chinese_rules);
  */
 
 void
-reset_engine()
+reset_engine(void)
 {
   /* To improve the reproducability of games, we restart the random
    * number generator with the same seed for each move. Thus we don't
@@ -921,7 +921,7 @@ set_search_diamond(int pos)
 /* unmarks the entire board */
 
 void
-reset_search_mask()
+reset_search_mask(void)
 {
   memset(search_mask, 0, sizeof(search_mask));
 }

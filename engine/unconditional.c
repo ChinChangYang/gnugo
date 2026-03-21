@@ -663,7 +663,7 @@ unconditionally_meaningless_move(int pos, int color, int *replacement_move)
 }
 
 void
-clear_unconditionally_meaningless_moves()
+clear_unconditionally_meaningless_moves(void)
 {
   int pos;
   

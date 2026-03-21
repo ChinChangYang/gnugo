@@ -98,7 +98,7 @@ static const int domain_colors[4] = {5, 1, 2, 3}; /* gray, black, white, both */
 
 /* Init color and print a line with coordinate letters above the board. */
 void
-start_draw_board()
+start_draw_board(void)
 {
   gg_init_color();
   draw_letter_coordinates(stderr);
@@ -146,7 +146,7 @@ draw_char(int m, int n, int c)
 
 /* Print a line with coordinate letters under the board. */
 void
-end_draw_board()
+end_draw_board(void)
 {
   fprintf(stderr, "\n");
   draw_letter_coordinates(stderr);

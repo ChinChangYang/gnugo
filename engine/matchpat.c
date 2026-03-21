@@ -75,7 +75,7 @@ print_profile(struct pattern *pattern, int *total_hits,
 
 /* Initialize pattern profiling fields in pattern struct arrays. */
 void
-prepare_pattern_profiling()
+prepare_pattern_profiling(void)
 {
 #if PROFILE_PATTERNS
   clear_profile(pat_db.patterns);
@@ -102,7 +102,7 @@ prepare_pattern_profiling()
  * match are listed.
  */
 void
-report_pattern_profiling()
+report_pattern_profiling(void)
 {
 #if PROFILE_PATTERNS
   int hits = 0;

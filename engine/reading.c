@@ -5496,7 +5496,7 @@ does_secure(int color, int move, int pos)
 
 /* Clear statistics. */
 void
-reset_reading_node_counter()
+reset_reading_node_counter(void)
 {
   reading_node_counter = 0;
 }
@@ -5504,7 +5504,7 @@ reset_reading_node_counter()
 
 /* Retrieve statistics. */
 int
-get_reading_node_counter()
+get_reading_node_counter(void)
 {
   return reading_node_counter;
 }
@@ -5514,7 +5514,7 @@ get_reading_node_counter()
 /* Draw the reading shadow, for debugging purposes */
 
 void
-draw_reading_shadow()
+draw_reading_shadow(void)
 {
   int i, j;
   int c = ' ';

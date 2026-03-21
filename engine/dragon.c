@@ -437,7 +437,7 @@ make_dragons(int stop_before_owl)
 
 /* Find capturable worms adjacent to each dragon. */
 static void
-find_lunches()
+find_lunches(void)
 {
   int str;
   for (str = BOARDMIN; str < BOARDMAX; str++)
@@ -486,7 +486,7 @@ find_lunches()
  * black_vital_points and white_vital_points.
  */
 static void
-eye_computations()
+eye_computations(void)
 { 
   int str;
 
@@ -527,7 +527,7 @@ eye_computations()
  * according to the criteria explained in the comments below.
  */
 static void
-revise_inessentiality()
+revise_inessentiality(void)
 {
   int str;
   /* Revise essentiality of critical worms. Specifically, a critical
@@ -760,7 +760,7 @@ initialize_supplementary_dragon_data(void)
  * we can look for immediate adjacencies.
  */
 static void
-find_neighbor_dragons()
+find_neighbor_dragons(void)
 {
   int m, n;
   int pos;
@@ -1102,7 +1102,7 @@ get_alive_stones(int color, signed char safe_stones[BOARDMAX])
  * distance 5.
  */
 static void
-identify_thrashing_dragons()
+identify_thrashing_dragons(void)
 {
   int k;
   int dist;
@@ -1199,7 +1199,7 @@ set_strength_data(int color, signed char safe_stones[BOARDMAX],
 
 
 void
-compute_dragon_influence()
+compute_dragon_influence(void)
 {
   signed char safe_stones[BOARDMAX];
   float strength[BOARDMAX];
@@ -2214,7 +2214,7 @@ compute_dragon_weakness_value(int d)
  * subsequent re-run of the influence code.
  */
 void
-compute_refined_dragon_weaknesses()
+compute_refined_dragon_weaknesses(void)
 {
   int d;
 
@@ -2234,7 +2234,7 @@ compute_refined_dragon_weaknesses()
  * neighbouring dragons of the opponent.
  */
 void
-compute_strategic_sizes()
+compute_strategic_sizes(void)
 {
   float *bonus = calloc(number_of_dragons, sizeof(float));
   int d;
@@ -2446,7 +2446,7 @@ static int num_cuts = 0;
 static struct cut_data cut_list[MAX_CUTS];
 
 static void
-clear_cut_list()
+clear_cut_list(void)
 {
   num_cuts = 0;
 }

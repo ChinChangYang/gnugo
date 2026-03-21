@@ -158,7 +158,7 @@ have_time_settings(void)
 
 /* Initialize all timers. */
 void
-init_timers()
+init_timers(void)
 {
   white_time_data.official.time_left = main_time;
   white_time_data.official.time_for_last_move = -1.0;
@@ -377,7 +377,7 @@ adjust_level_offset(int color)
 /********************************/
 
 int
-get_level()
+get_level(void)
 {
   return level + level_offset;
 }

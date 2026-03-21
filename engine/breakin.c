@@ -442,7 +442,7 @@ break_territories(int color_to_move, struct influence_data *q, int store,
 }
 
 void
-clear_break_in_list()
+clear_break_in_list(void)
 {
   num_break_ins = 0;
 }

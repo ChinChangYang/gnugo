@@ -99,7 +99,7 @@ xrealloc(void *pt, unsigned int size)
  */
 
 SGFNode *
-sgfNewNode()
+sgfNewNode(void)
 {
   SGFNode *newnode;
   newnode = xalloc(sizeof(SGFNode));
@@ -918,7 +918,7 @@ parse_error(const char *msg, int arg)
 
 
 static void
-nexttoken()
+nexttoken(void)
 {
   do
     lookahead = sgf_getch();

@@ -304,7 +304,7 @@ static struct handicap_match handicap_matches[MAX_HANDICAP_MATCHES];
 static int number_of_matches;
 
 static int
-find_free_handicap_pattern()
+find_free_handicap_pattern(void)
 {
   int k;
   int highest_value = -1;
@@ -425,14 +425,14 @@ free_handicap_callback(int anchor, int color, struct pattern *pattern,
 }
 
 int
-free_handicap_remaining_stones()
+free_handicap_remaining_stones(void)
 {
   gg_assert(remaining_handicap_stones >= 0);
   return remaining_handicap_stones;
 }
 
 int
-free_handicap_total_stones()
+free_handicap_total_stones(void)
 {
   gg_assert(total_handicap_stones >= 0);
   return total_handicap_stones;

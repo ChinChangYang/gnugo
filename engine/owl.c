@@ -7207,7 +7207,7 @@ catalog_goal(struct local_owl_data *owl, int goal_worm[MAX_GOAL_WORMS])
 
 /* Clear statistics. */
 void
-reset_owl_node_counter()
+reset_owl_node_counter(void)
 {
   global_owl_node_counter = 0;
 }
@@ -7215,7 +7215,7 @@ reset_owl_node_counter()
 
 /* Retrieve statistics. */
 int
-get_owl_node_counter()
+get_owl_node_counter(void)
 {
   return global_owl_node_counter;
 }
