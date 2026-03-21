@@ -353,11 +353,19 @@ def main():
 
     regression_dir = Path(__file__).parent
 
-    for path, label in [(gnugo, "GnuGo"), (katago, "KataGo"),
-                        (model, "Model"), (config, "Config")]:
-        if not path.exists():
-            print(f"ERROR: {label} not found: {path}", file=sys.stderr)
-            sys.exit(1)
+    errors = []
+    if not gnugo.exists():
+        errors.append(f"GnuGo not found at {gnugo} (use --gnugo)")
+    if not katago.exists():
+        errors.append(f"KataGo not found at {katago} (use --katago)")
+    if not model.exists():
+        errors.append(f"KataGo model not found at {model} (use --model)")
+    if not config.exists():
+        errors.append(f"KataGo config not found at {config} (use --config)")
+    if errors:
+        for e in errors:
+            print(f"Error: {e}", file=sys.stderr)
+        sys.exit(1)
 
     # -----------------------------------------------------------------------
     # Step 1: collect unexpected failures across all test files
