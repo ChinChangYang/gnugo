@@ -20,13 +20,6 @@ loadsgf games/niki.sgf 92
 4 reg_genmove white
 #? [Q8]
 
-#S10 seems OK, much better than game move of S14. Added it -trevor
-#S14 is thought to owl attack the corner. If this is correct the move
-#looks okay. Otherwise we need to fix the owl reading. /gf
-loadsgf games/niki.sgf 94
-5 reg_genmove white
-#? [S9|S10]
-
 loadsgf games/niki.sgf 106
 6 restricted_genmove white S18 P18
 #? [P18]

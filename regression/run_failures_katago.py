@@ -208,10 +208,12 @@ def parse_sgf_moves(sgf_path: Path, num_moves: int, board_size: int) -> list:
     ]
 
 
-def build_gtp_session(moves: list, komi: float, board_size: int) -> str:
-    lines = [f"boardsize {board_size}", f"komi {komi}", "clear_board"]
-    for color, vertex in moves:
-        lines.append(f"play {color} {vertex}")
+def build_gtp_session(sgf_path: Path, num_moves: int, komi: float, board_size: int) -> str:
+    lines = [f"boardsize {board_size}", f"komi {komi}"]
+    if num_moves != 9999:
+        lines.append(f"loadsgf {sgf_path} {num_moves - 1}")
+    else:
+        lines.append(f"loadsgf {sgf_path}")
     lines += ["kata-raw-nn 0", "quit"]
     return "\n".join(lines) + "\n"
 
@@ -340,6 +342,8 @@ def main():
                         help="GnuGo level (default 10)")
     parser.add_argument("--patch", action="store_true",
                         help="Rewrite .tst files in-place to add KataGo alternatives and * marker")
+    parser.add_argument("--files", nargs="+", metavar="TST",
+                        help="Process these .tst files instead of FIRST_BATCH")
     args = parser.parse_args()
 
     gnugo  = Path(args.gnugo)  if args.gnugo  else GNUGO_PATH
@@ -356,11 +360,12 @@ def main():
             sys.exit(1)
 
     # -----------------------------------------------------------------------
-    # Step 1: collect unexpected failures across all 13 test files
+    # Step 1: collect unexpected failures across all test files
     # -----------------------------------------------------------------------
     failures = []
 
-    for tst_name in FIRST_BATCH:
+    tst_list = args.files if args.files else FIRST_BATCH
+    for tst_name in tst_list:
         tst_path = regression_dir / tst_name
         if not tst_path.exists():
             print(f"WARNING: {tst_name} not found, skipping", file=sys.stderr)
@@ -406,11 +411,7 @@ def main():
 
         board_size = parse_sgf_board_size(sgf_abs)
         komi       = parse_sgf_komi(sgf_abs)
-        # loadsgf N means "position before move N": replay N-1 moves
-        replay = tc.num_moves - 1 if tc.num_moves != 9999 else 9998
-
-        moves = parse_sgf_moves(sgf_abs, replay, board_size)
-        gtp   = build_gtp_session(moves, komi, board_size)
+        gtp        = build_gtp_session(sgf_abs, tc.num_moves, komi, board_size)
 
         try:
             stdout, _ = run_katago(gtp, katago, model, config)
@@ -469,9 +470,16 @@ def main():
         rows.append([tc.tst_name, str(tc.test_id),
                      gnugo_col, expected_col] + kata_cols)
 
-        kata_top3 = [v for _, v in ranked[:3] if v != "pass"][:3]
-        tst_path = regression_dir / tc.tst_name
-        patch_map[(tst_path, tc.test_id)] = kata_top3
+        inner_p = re.sub(r'^\[', '', tc.pattern)
+        inner_p = re.sub(r'\][&*]*$', '', inner_p)
+        negate_p = inner_p.startswith('!')
+        if not negate_p:
+            best_expected = best_rank_for_pattern(inner_p, ranked)
+            expected_prob = best_expected[1] if best_expected is not None else 0.0
+            better_moves = [v for p, v in ranked if p > expected_prob and v != "pass"][:3]
+            if better_moves:
+                tst_path = regression_dir / tc.tst_name
+                patch_map[(tst_path, tc.test_id)] = better_moves
 
     # -----------------------------------------------------------------------
     # Step 3: print Markdown table

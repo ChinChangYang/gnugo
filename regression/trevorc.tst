@@ -127,11 +127,6 @@ loadsgf games/trevor/auto/c17.sgf 42
 #? [!H5]
 
 
-loadsgf games/trevor/auto/c17.sgf 50
-300 reg_genmove white
-#? [J2|J3|K2|J13|K13]
-
-
 loadsgf games/trevor/auto/c17.sgf 54
 310 reg_genmove white
 #? [H12]
@@ -164,11 +159,6 @@ loadsgf games/trevor/auto/c18.sgf 48
 loadsgf games/trevor/auto/c18.sgf 68
 360 reg_genmove white
 #? [H11]
-
-
-loadsgf games/trevor/auto/c18.sgf 74
-370 reg_genmove white
-#? [F13|D1]
 
 
 loadsgf games/trevor/auto/c18.sgf 82

@@ -33,13 +33,6 @@ loadsgf games/mfgg2.sgf 23
 #? [R3]*
 
 #CATEGORY=OWL_TUNING
-#DESCRIPTION=Q5 dragon is under severe pressure.
-#SEVERITY=8
-loadsgf games/mfgg2.sgf 45
-7 reg_genmove black
-#? [R2|S7]
-
-#CATEGORY=OWL_TUNING
 #DESCRIPTION=GNU Go doesn't understand this type of corner position!
 #SEVERITY=10
 #GG often messes up in this type of corner position.

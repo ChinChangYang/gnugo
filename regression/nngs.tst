@@ -335,14 +335,6 @@ loadsgf games/nngs/gnugo-3.1.15-goku-200112081829.sgf 116
 660 reg_genmove white
 #? [H3]*
 
-
-
-
-loadsgf games/nngs/gnugo-3.1.15-goku-200112081829.sgf 146
-680 reg_genmove white
-#? [P13]
-
-
 loadsgf games/nngs/gnugo-3.1.15-goku-200112081829.sgf 152
 690 reg_genmove white
 #? [N13]

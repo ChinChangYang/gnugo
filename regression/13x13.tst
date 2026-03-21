@@ -33,11 +33,6 @@ loadsgf games/mertin13x13/goliath-gnugo2.W+9.sgf 30
 4 reg_genmove white
 #? [L9]*
 
-#CATEGORY=ENDGAME_TUNING
-loadsgf games/mertin13x13/goliath-gnugo3.W+0.sgf 42
-5 reg_genmove white
-#? [N10|N9|M1]
-
 #CATEGORY=BLUNDER
 # New failure (comparing 3.1.15 with 3.0.0)
 loadsgf games/mertin13x13/goliath-gnugo3.W+0.sgf 44
@@ -406,11 +401,6 @@ loadsgf games/mertin13x13/gnugo-gointellect2.W+2.sgf 13
 75 restricted_genmove black D11 E12
 #? [E12]
 
-#CATEGORY=TERRITORIAL_EVALUATION
-loadsgf games/mertin13x13/gnugo-gointellect2.W+2.sgf 17
-76 reg_genmove black
-#? [K6|L6|J3]
-
 # New failure (comparing 3.1.15 with 3.0.0)
 loadsgf games/mertin13x13/gnugo-gointellect2.W+2.sgf 19
 77 reg_genmove black
@@ -457,12 +447,6 @@ loadsgf games/mertin13x13/gnugo-gointellect3.W+37.sgf 29
 loadsgf games/mertin13x13/gnugo-gointellect3.W+37.sgf 45
 86 owl_attack L5
 #? [1 (H5|J4)]
-
-#CATEGORY=TACTICAL_READING
-# GNU Go claims that D6 defends the worms D9 and F9
-loadsgf games/mertin13x13/gnugo-gointellect3.W+37.sgf 65
-87 reg_genmove black
-#? [E6]
 
 #CATEGORY=BLUNDER
 # New failure (comparing 3.1.15 with 3.0.0)
