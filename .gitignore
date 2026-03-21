@@ -22,3 +22,6 @@ build/
 
 # macOS metadata files.
 .DS_Store
+
+# Claude Code working directory.
+.claude/
