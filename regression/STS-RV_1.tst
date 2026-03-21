@@ -2,7 +2,7 @@
 # available at http://gobase.org/reading/preview/Semeai/#STS
 #
 # It is a very comprehensive semeai problems suite
-# compiled by Ricard Vil‡. The associated tests are in GTP
+# compiled by Ricard Vil√†. The associated tests are in GTP
 # format but it's not a perfect match for GNU Go because
 # it uses a custom command called solve-semeaiS.
 # (More info at http://trac.gnugo.org/gnugo/ticket/41)
