@@ -513,6 +513,12 @@ class RegressionModel {
             command = "followup_influence \(settings.moveColor) \(move)"
         }
 
+        // move_influence and followup_influence call prepare_move_influence_debugging()
+        // which requires genmove() to have populated move reasons for the SAME color.
+        if settings.influenceSource == .afterMove || settings.influenceSource == .followup {
+            send("reg_genmove \(settings.moveColor)")
+        }
+
         let whatData: String
         switch settings.influenceData {
         case .regions:           whatData = "influence_regions"

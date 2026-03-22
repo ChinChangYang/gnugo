@@ -26,6 +26,8 @@ class GtpEngine {
     private var crashCallback: (() -> Void)?
 
     init(command: [String], crashCallback: (() -> Void)? = nil) {
+        // Ignore SIGPIPE so writing to a dead engine doesn't kill the app.
+        signal(SIGPIPE, SIG_IGN)
         self.commandLine = command.joined(separator: " ")
         self.crashCallback = crashCallback
         self.process = Process()
@@ -68,7 +70,15 @@ class GtpEngine {
         guard let data = cmd.data(using: .utf8) else {
             return GtpResponse(status: "?", text: "encoding error")
         }
-        stdinPipe.fileHandleForWriting.write(data)
+        // Use POSIX write() instead of NSFileHandle.write() to avoid an uncatchable
+        // ObjC NSFileHandleOperationException when the engine has crashed.
+        let fd = stdinPipe.fileHandleForWriting.fileDescriptor
+        let written = data.withUnsafeBytes { buf in
+            Darwin.write(fd, buf.baseAddress!, buf.count)
+        }
+        if written < 0 {
+            return GtpResponse(status: "?", text: "engine crashed")
+        }
 
         var response = GtpResponse(status: "", text: "")
         var firstLine = true
