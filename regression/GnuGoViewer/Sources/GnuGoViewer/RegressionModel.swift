@@ -351,8 +351,19 @@ class RegressionModel {
         // For non-genmove test cases (e.g. defend, attack), genmove() was never
         // called so best_moves[] is empty.  Trigger move generation so that
         // top_moves / all_move_values have data to return.
+        // Re-enable trace capture so delta territory can read the output.
         if !isGenMove {
+            tracesLock.lock()
+            traces = []
+            tracesLock.unlock()
+            engine.traceCallback = { [weak self] s in
+                guard let self = self else { return }
+                self.tracesLock.lock()
+                self.traces.append(s)
+                self.tracesLock.unlock()
+            }
             send("reg_genmove \(colorToMove)")
+            engine.traceCallback = nil
         }
 
         // Snapshot traces under lock before iterating.
@@ -390,10 +401,16 @@ class RegressionModel {
                 while k >= 0 {
                     guard traces[k].hasPrefix("    ") else { break }
                     textLines.insert(traces[k], at: 0)
+                    // Trace format: "    G1:   - H1 territory change 1.00 (-1.00 -> -0.00)"
+                    //   p: [G1:, -, H1, territory, change, 1.00, ...]
+                    // Or:  "    G1:   - captured stones 1.00"
+                    //   p: [G1:, -, captured, stones, 1.00]
                     let p = traces[k].components(separatedBy: .whitespaces).filter { !$0.isEmpty }
-                    if p.count >= 4, p[1] == "-", let val = Double(p[3]) {
-                        let vx = p[0].trimmingCharacters(in: .init(charactersIn: ":"))
-                        goban.addText(vertex: vx, text: p[3], color: val < 0 ? .red : .blue)
+                    if p.count >= 6, p[1] == "-", p[3] == "territory", p[4] == "change",
+                       let val = Double(p[5]) {
+                        let vx = p[2]
+                        let label = String(format: "%.1f", val)
+                        goban.addText(vertex: vx, text: label, color: val < 0 ? .red : .blue)
                     }
                     k -= 1
                 }
