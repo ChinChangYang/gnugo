@@ -31,6 +31,7 @@ class RegressionModel {
 
     var completeTest: [String] = []
     var testcaseCommand: String = ""
+    var colorToMove: String = "black"
 
     init(engine: GtpEngine, name: String) {
         self.engine = engine
@@ -52,7 +53,10 @@ class RegressionModel {
             let first = line.first.map(String.init) ?? ""
             // Skip comment lines, blank lines, and numbered test lines
             if !"0123456789 #".contains(first) && !first.isEmpty {
-                send(line)
+                let response = send(line)
+                if line.hasPrefix("loadsgf") {
+                    colorToMove = response.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+                }
             }
         }
     }
@@ -342,6 +346,13 @@ class RegressionModel {
             // Use resultSnapshot (non-@Published) instead of result to avoid off-main read.
             goban.addSymbol(vertex: resultSnapshot, symbol: .stone,
                             color: moveColor == "white" ? .white : .black)
+        }
+
+        // For non-genmove test cases (e.g. defend, attack), genmove() was never
+        // called so best_moves[] is empty.  Trigger move generation so that
+        // top_moves / all_move_values have data to return.
+        if !isGenMove {
+            send("reg_genmove \(colorToMove)")
         }
 
         // Snapshot traces under lock before iterating.
