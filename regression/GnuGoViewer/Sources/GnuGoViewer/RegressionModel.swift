@@ -1,15 +1,16 @@
 import Foundation
 import SwiftUI
 
-class RegressionModel: ObservableObject {
+@Observable
+class RegressionModel {
     let engine: GtpEngine
     let goban: GobanModel
     let name: String
 
-    // All @Published — must only be mutated on main thread.
-    @Published var dataText: String = ""
-    @Published var dataTitle: String = ""
-    @Published var result: String = ""
+    // Observable properties — must only be mutated on main thread.
+    var dataText: String = ""
+    var dataTitle: String = ""
+    var result: String = ""
 
     // traces is appended from the stderr thread and reset from the GTP queue;
     // protect both with tracesLock.

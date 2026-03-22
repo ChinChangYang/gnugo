@@ -1,10 +1,14 @@
 import SwiftUI
+import AppKit
 
 @main
 struct GnuGoViewerApp: App {
-    @StateObject private var appState: AppState
+    @State private var appState: AppState
 
     init() {
+        // Allow the window to appear when launched from the terminal (not a .app bundle).
+        NSApplication.shared.setActivationPolicy(.regular)
+
         // Skip argv[0] (program name); also skip "--" if passed by swift run
         let rawArgs = CommandLine.arguments.dropFirst().filter { $0 != "--" }
         let args = Array(rawArgs)
@@ -16,13 +20,17 @@ struct GnuGoViewerApp: App {
 
         // Resolve gnugo relative to cwd (regression/GnuGoViewer/ -> ../../interface/gnugo)
         let gnugoPath: String = {
+            let cwd = FileManager.default.currentDirectoryPath
             let candidates = [
                 "../../interface/gnugo",
                 "../interface/gnugo",
                 "./interface/gnugo",
             ]
             for c in candidates {
-                if FileManager.default.fileExists(atPath: c) { return c }
+                if FileManager.default.fileExists(atPath: c) {
+                    // Resolve to absolute path — URL(fileURLWithPath:) drops ../ components.
+                    return URL(fileURLWithPath: cwd + "/" + c).standardized.path
+                }
             }
             // Fall back; the engine will fail to start but at least the app opens
             fputs("Warning: could not find gnugo binary. Tried: \(candidates.joined(separator: ", "))\n", stderr)
@@ -34,13 +42,13 @@ struct GnuGoViewerApp: App {
         )
 
         let state = AppState(engine: engine, testcases: args)
-        _appState = StateObject(wrappedValue: state)
+        _appState = State(initialValue: state)
     }
 
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .environmentObject(appState)
+                .environment(appState)
                 .frame(minWidth: 900, minHeight: 720)
         }
         .windowStyle(.titleBar)

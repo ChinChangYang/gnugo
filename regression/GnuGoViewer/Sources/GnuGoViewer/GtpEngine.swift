@@ -7,7 +7,8 @@ struct GtpResponse {
     var isFailure: Bool { status == "?" }
 }
 
-class GtpEngine: ObservableObject {
+@Observable
+class GtpEngine {
     let commandLine: String
     private let callbackLock = NSLock()
     private var _traceCallback: ((String) -> Void)?

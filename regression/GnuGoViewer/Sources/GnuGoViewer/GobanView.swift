@@ -1,11 +1,18 @@
 import SwiftUI
 
 struct GobanView: View {
-    @ObservedObject var model: GobanModel
+    var model: GobanModel
     let boardPixelSize: CGFloat
     let onTap: (String) -> Void
 
     var body: some View {
+        // Explicitly access observable properties during body evaluation so
+        // SwiftUI's @Observable tracking registers them as view dependencies.
+        // The Canvas draw closure runs outside the tracked body scope.
+        let _ = model.boardSize
+        let _ = model.whiteStones
+        let _ = model.blackStones
+        let _ = model.markups
         Canvas { ctx, _ in
             drawBoard(ctx: ctx)
         }
@@ -154,7 +161,7 @@ struct GobanView: View {
 
         case .text(let s):
             let fontSize = max(8, sp * 0.4)
-            let t = Text(s).font(.system(size: fontSize)).foregroundColor(color)
+            let t = Text(s).font(.system(size: fontSize)).foregroundStyle(color)
             ctx.draw(t, at: CGPoint(x: cx, y: cy), anchor: .center)
         }
     }

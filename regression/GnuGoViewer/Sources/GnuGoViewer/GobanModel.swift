@@ -22,12 +22,13 @@ struct Markup {
     var color: Color
 }
 
-class GobanModel: ObservableObject {
-    // @Published properties — must only be written on main thread.
-    @Published var boardSize: Int
-    @Published var whiteStones: Set<String> = []
-    @Published var blackStones: Set<String> = []
-    @Published var markups: [Markup] = []
+@Observable
+class GobanModel {
+    // Observable properties — must only be written on main thread.
+    var boardSize: Int
+    var whiteStones: Set<String> = []
+    var blackStones: Set<String> = []
+    var markups: [Markup] = []
 
     // Staging buffers — written on any thread, committed to @Published in one
     // DispatchQueue.main.async call to avoid per-mutation main-thread hops.

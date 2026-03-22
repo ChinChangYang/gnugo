@@ -81,12 +81,13 @@ struct MarkupSettings {
 
 // MARK: - AppState
 
-class AppState: ObservableObject {
-    @Published var models: [RegressionModel] = []
-    @Published var currentTabIndex: Int = 0
-    @Published var settings = MarkupSettings()
-    @Published var fullTestcaseText: String = ""
-    @Published var currentModelIndex: Int = 0
+@Observable
+class AppState {
+    var models: [RegressionModel] = []
+    var currentTabIndex: Int = 0
+    var settings = MarkupSettings()
+    var fullTestcaseText: String = ""
+    var currentModelIndex: Int = 0
 
     var testcases: [String]
     var testcaseIndex: Int = 0
@@ -134,10 +135,21 @@ class AppState: ObservableObject {
             filename += ".tst"
         }
 
-        guard let contents = try? String(contentsOfFile: filename, encoding: .utf8) else { return false }
+        // Resolve filename to an absolute path so that loadsgf SGF paths inside the .tst
+        // file (which are relative to the regression directory) survive being sent to a
+        // gnugo process that may have a different cwd (e.g. regression/GnuGoViewer/).
+        let cwd = FileManager.default.currentDirectoryPath
+        let absoluteFilename: String
+        if filename.hasPrefix("/") {
+            absoluteFilename = filename
+        } else {
+            absoluteFilename = URL(fileURLWithPath: cwd + "/" + filename).standardized.path
+        }
+
+        guard let contents = try? String(contentsOfFile: absoluteFilename, encoding: .utf8) else { return false }
 
         if filename.hasSuffix(".sgf") {
-            let s = "loadsgf \(filename) \(number)"
+            let s = "loadsgf \(absoluteFilename) \(number)"
             let color = engine.sendCommand(s).text
             testcaseCommand = "reg_genmove \(color)"
             let text = "\(s)\n\(testcaseCommand)"
@@ -167,7 +179,17 @@ class AppState: ObservableObject {
 
             if firstChar >= "a" && firstChar <= "z" {
                 if line.hasPrefix("loadsgf") {
-                    complete = [line]
+                    // Resolve the SGF path to absolute so gnugo can find it regardless of cwd.
+                    let tstDir = URL(fileURLWithPath: absoluteFilename).deletingLastPathComponent()
+                    let parts = line.components(separatedBy: " ")
+                    if parts.count >= 2 {
+                        let sgfPath = parts[1]
+                        let resolved = sgfPath.hasPrefix("/") ? sgfPath
+                            : URL(fileURLWithPath: tstDir.path + "/" + sgfPath).standardized.path
+                        complete = [(["loadsgf", resolved] + Array(parts.dropFirst(2))).joined(separator: " ")]
+                    } else {
+                        complete = [line]
+                    }
                 } else {
                     complete.append(line)
                 }
@@ -216,10 +238,9 @@ class AppState: ObservableObject {
     func loadNewTestcase(_ spec: String) {
         guard !models.isEmpty else { return }
         let engine = models[0].engine
-        guard excerptTestcase(spec, engine: engine) else { return }
-
         DispatchQueue.global().async { [weak self] in
             guard let self = self else { return }
+            guard self.excerptTestcase(spec, engine: engine) else { return }
             for model in self.models {
                 model.wormsInitialized = false
                 model.dragonsInitialized = false
@@ -283,8 +304,10 @@ class AppState: ObservableObject {
                 }
             case 1: // Move generation
                 if self.settings.moveGenMode == .deltaTerritory {
-                    DispatchQueue.main.async { self.settings.deltaVertex = vertex }
-                    self.refreshMarkup()
+                    DispatchQueue.main.async {
+                        self.settings.deltaVertex = vertex
+                        self.refreshMarkup()
+                    }
                 } else {
                     model.showMoveReasons(vertex: vertex)
                 }
@@ -294,8 +317,10 @@ class AppState: ObservableObject {
             case 3: // Influence
                 if self.settings.influenceSource == .afterMove
                     || self.settings.influenceSource == .followup {
-                    DispatchQueue.main.async { self.settings.moveInfluenceVertex = vertex }
-                    self.refreshMarkup()
+                    DispatchQueue.main.async {
+                        self.settings.moveInfluenceVertex = vertex
+                        self.refreshMarkup()
+                    }
                 }
             case 4: // Reading
                 self.handleReadingTap(vertex: vertex, model: model)
@@ -381,13 +406,14 @@ class AppState: ObservableObject {
 // MARK: - ContentView
 
 struct ContentView: View {
-    @EnvironmentObject var state: AppState
+    @Environment(AppState.self) var state
     @State private var newTestcaseText: String = ""
     @State private var enginePathText: String = "../../interface/gnugo"
     @State private var engineNameText: String = "Engine 2"
 
     var body: some View {
-        VStack(spacing: 0) {
+        @Bindable var state = state
+        return VStack(spacing: 0) {
             // Top: testcase text + engine selector
             HStack(alignment: .top, spacing: 16) {
                 ScrollView([.horizontal, .vertical]) {
@@ -422,7 +448,7 @@ struct ContentView: View {
                     readingTab.tabItem { Text("reading") }.tag(4)
                 }
                 .frame(width: 260)
-                .onChange(of: state.currentTabIndex) { _ in state.refreshMarkup() }
+                .onChange(of: state.currentTabIndex) { state.refreshMarkup() }
 
                 // Right: board + data
                 VStack(spacing: 4) {
@@ -450,13 +476,17 @@ struct ContentView: View {
                 }
             }
             .padding(4)
+            .onAppear {
+                NSApp.activate(ignoringOtherApps: true)
+            }
         }
     }
 
     // MARK: - Tab pages
 
     var wormsAndDragonsTab: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        @Bindable var state = state
+        return VStack(alignment: .leading, spacing: 8) {
             Picker("Data", selection: $state.settings.wormDragonDataMode) {
                 ForEach(WormDragonDataMode.allCases, id: \.self) { m in
                     Text(m.label).tag(m)
@@ -549,7 +579,8 @@ struct ContentView: View {
     }
 
     var readingTab: some View {
-        VStack(alignment: .leading, spacing: 4) {
+        @Bindable var state = state
+        return VStack(alignment: .leading, spacing: 4) {
             ForEach([
                 ("tactical reading",    ReadingMode.tactical),
                 ("owl reading",         ReadingMode.owl),
@@ -565,16 +596,16 @@ struct ContentView: View {
             }
             Divider()
             Toggle("save sgf traces to", isOn: $state.settings.saveSgf)
-                .onChange(of: state.settings.saveSgf) { v in
+                .onChange(of: state.settings.saveSgf) { _, newValue in
                     // Mirror Pike sgf_traces_button_toggled: unchecking save also unchecks viewer
-                    if !v { state.settings.openSgfViewer = false }
+                    if !newValue { state.settings.openSgfViewer = false }
                 }
             TextField("SGF file", text: $state.settings.sgfFile)
                 .textFieldStyle(.roundedBorder).font(.system(size: 11))
             Toggle("start sgf viewer as", isOn: $state.settings.openSgfViewer)
-                .onChange(of: state.settings.openSgfViewer) { v in
+                .onChange(of: state.settings.openSgfViewer) { _, newValue in
                     // Mirror Pike sgf_viewer_button_toggled: checking viewer also checks save
-                    if v { state.settings.saveSgf = true }
+                    if newValue { state.settings.saveSgf = true }
                 }
             TextField("viewer command", text: $state.settings.sgfViewerCmd)
                 .textFieldStyle(.roundedBorder).font(.system(size: 11))
@@ -610,7 +641,7 @@ struct ContentView: View {
         Button(action: action) {
             HStack(spacing: 6) {
                 Image(systemName: isOn ? "largecircle.fill.circle" : "circle")
-                    .foregroundColor(isOn ? .accentColor : .secondary)
+                    .foregroundStyle(isOn ? Color.accentColor : Color.secondary)
                 Text(label).font(.system(size: 12))
                 Spacer()
             }
