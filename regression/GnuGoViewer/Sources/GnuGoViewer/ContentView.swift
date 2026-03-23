@@ -21,7 +21,7 @@ struct ContentView: View {
                             .font(.system(.body, design: .monospaced))
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
-                    .frame(height: 70)
+                    .frame(height: 140)
                     .border(Color.gray.opacity(0.4))
 
                     if state.models.count > 1 {
