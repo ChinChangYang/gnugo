@@ -49,8 +49,9 @@ struct GnuGoViewerApp: App {
         WindowGroup {
             ContentView()
                 .environment(appState)
-                .frame(minWidth: 900, minHeight: 720)
+                .frame(minWidth: 1100, minHeight: 700)
         }
+        .defaultSize(width: 1100, height: 850)
         .windowStyle(.titleBar)
     }
 }

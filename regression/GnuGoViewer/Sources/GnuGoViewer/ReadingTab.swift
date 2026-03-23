@@ -28,16 +28,16 @@ struct ReadingTab: View {
                     if !newValue { state.settings.openSgfViewer = false }
                 }
             TextField("SGF file", text: $state.settings.sgfFile)
-                .textFieldStyle(.roundedBorder).font(.system(size: 11))
+                .textFieldStyle(.roundedBorder)
             Toggle("start sgf viewer as", isOn: $state.settings.openSgfViewer)
                 .onChange(of: state.settings.openSgfViewer) { _, newValue in
                     if newValue { state.settings.saveSgf = true }
                 }
             TextField("viewer command", text: $state.settings.sgfViewerCmd)
-                .textFieldStyle(.roundedBorder).font(.system(size: 11))
+                .textFieldStyle(.roundedBorder)
             Divider()
             TextField("load testcase (file:num)", text: $newTestcaseText)
-                .textFieldStyle(.roundedBorder).font(.system(size: 11))
+                .textFieldStyle(.roundedBorder)
                 .onSubmit { state.loadNewTestcase(newTestcaseText) }
             Button("Load new testcase") { state.loadNewTestcase(newTestcaseText) }
             if state.testcases.count > 1 {
@@ -50,9 +50,9 @@ struct ReadingTab: View {
             }
             Divider()
             TextField("engine path", text: $enginePathText)
-                .textFieldStyle(.roundedBorder).font(.system(size: 11))
+                .textFieldStyle(.roundedBorder)
             TextField("engine name", text: $engineNameText)
-                .textFieldStyle(.roundedBorder).font(.system(size: 11))
+                .textFieldStyle(.roundedBorder)
             Button("Start new engine") {
                 state.selectNewEngine(path: enginePathText, name: engineNameText)
             }

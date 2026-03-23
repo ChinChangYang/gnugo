@@ -10,7 +10,7 @@ struct RadioButton: View {
             HStack(spacing: 6) {
                 Image(systemName: isOn ? "largecircle.fill.circle" : "circle")
                     .foregroundStyle(isOn ? Color.accentColor : Color.secondary)
-                Text(label).font(.system(size: 12))
+                Text(label)
                 Spacer()
             }
         }
