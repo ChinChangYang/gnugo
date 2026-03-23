@@ -27,6 +27,8 @@ struct GobanView: View {
                     onTap(v)
                 }
         )
+        .accessibilityAddTraits(.isButton)
+        .accessibilityLabel("Go board")
     }
 
     private func drawBoard(ctx: GraphicsContext) {
@@ -67,15 +69,15 @@ struct GobanView: View {
             let font = Font.system(size: fontSize)
 
             // Letters top & bottom
-            ctx.draw(Text(letter).font(font).foregroundColor(.black),
+            ctx.draw(Text(letter).font(font).foregroundStyle(.black),
                      at: CGPoint(x: kf, y: off / 2), anchor: .center)
-            ctx.draw(Text(letter).font(font).foregroundColor(.black),
+            ctx.draw(Text(letter).font(font).foregroundStyle(.black),
                      at: CGPoint(x: kf, y: end + off / 2), anchor: .center)
 
             // Numbers left & right
-            ctx.draw(Text(number).font(font).foregroundColor(.black),
+            ctx.draw(Text(number).font(font).foregroundStyle(.black),
                      at: CGPoint(x: off / 2, y: kf), anchor: .center)
-            ctx.draw(Text(number).font(font).foregroundColor(.black),
+            ctx.draw(Text(number).font(font).foregroundStyle(.black),
                      at: CGPoint(x: end + off / 2, y: kf), anchor: .center)
         }
 

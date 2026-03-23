@@ -18,16 +18,15 @@ class RegressionModel {
     var traces: [String] = []
     // Non-@Published mirror of result; safe to read from any thread after handleTestcase returns.
     private(set) var resultSnapshot: String = ""
-    var worms: [String: [String]] = [:]
-    var dragons: [String: [String]] = [:]
-    var wormsInitialized = false
-    var dragonsInitialized = false
-    var wormAndDragonCache: [String: String] = [:]
+    private var worms: [String: [String]] = [:]
+    private var dragons: [String: [String]] = [:]
+    private var wormsInitialized = false
+    private var dragonsInitialized = false
+    private var wormAndDragonCache: [String: String] = [:]
 
-    // eye data cache
-    var eyeData: [String: [String: String]]?       // color -> vertex -> raw string
+    private(set) var eyeData: [String: [String: String]]?
     var halfEyeData: [String: String] = [:]
-    var eyeTypes: [String: [String: String]]?       // color -> vertex -> "proper"/"half"/"marginal"
+    private(set) var eyeTypes: [String: [String: String]]?
 
     var completeTest: [String] = []
     var testcaseCommand: String = ""
@@ -39,7 +38,26 @@ class RegressionModel {
         self.goban = GobanModel(boardSize: 19)
     }
 
-    // MARK: - GTP helpers (background thread only)
+    // MARK: - Lifecycle
+
+    func resetCaches() {
+        wormsInitialized = false
+        dragonsInitialized = false
+        worms = [:]
+        dragons = [:]
+        wormAndDragonCache = [:]
+        eyeData = nil
+        eyeTypes = nil
+    }
+
+    /// Load testcase lines, refresh the board, and run the test command.
+    func loadAndRunTestcase(lines: [String], command: String) {
+        completeTest = lines
+        testcaseCommand = command
+        loadTestcase(lines: lines)
+        refreshBoard()
+        handleTestcase(command: command)
+    }
 
     @discardableResult
     func send(_ cmd: String) -> String {
@@ -48,7 +66,7 @@ class RegressionModel {
 
     // MARK: - Test loading
 
-    func loadTestcase(lines: [String]) {
+    private func loadTestcase(lines: [String]) {
         for line in lines {
             let first = line.first.map(String.init) ?? ""
             // Skip comment lines, blank lines, and numbered test lines
@@ -245,7 +263,7 @@ class RegressionModel {
         if useFile {
             send("finish_sgftrace \(sgfFile)")
             if !sgfViewerCmd.isEmpty {
-                let parts = sgfViewerCmd.replacingOccurrences(of: "%s", with: sgfFile)
+                let parts = sgfViewerCmd.replacing("%s", with: sgfFile)
                     .components(separatedBy: " ")
                 let proc = Process()
                 proc.executableURL = URL(fileURLWithPath: parts[0])
@@ -261,15 +279,14 @@ class RegressionModel {
     // All functions manipulate the goban staging buffer (background-thread safe).
     // addMarkup() commits the staging buffer to the main thread at the end.
 
-    func addMarkup(mode: Int, settings: MarkupSettings) {
+    func addMarkup(tab: TabSelection, settings: MarkupSettings) {
         goban.clearMarkup()
-        switch mode {
-        case 0: addWormsAndDragonsMarkup(settings: settings)
-        case 1: addMoveGenerationMarkup(settings: settings)
-        case 2: addEyesMarkup(settings: settings)
-        case 3: addInfluenceMarkup(settings: settings)
-        case 4: addReadingMarkup(settings: settings)
-        default: break
+        switch tab {
+        case .wormsAndDragons: addWormsAndDragonsMarkup(settings: settings)
+        case .moveGeneration:  addMoveGenerationMarkup(settings: settings)
+        case .eyes:            addEyesMarkup(settings: settings)
+        case .influence:       addInfluenceMarkup(settings: settings)
+        case .reading:         addReadingMarkup(settings: settings)
         }
         goban.commitMarkup()   // single dispatch to main thread
     }
@@ -441,8 +458,8 @@ class RegressionModel {
     }
 
     private func computeEyeData() {
-        eyeData = ["white": [:], "black": [:]]
-        eyeTypes = ["white": [:], "black": [:]]
+        var ed: [String: [String: String]] = ["white": [:], "black": [:]]
+        var et: [String: [String: String]] = ["white": [:], "black": [:]]
         halfEyeData = [:]
         // Use a snapshot of boardSize to avoid reading @Published from background.
         // GobanModel.boardSize is only written from main via stageBoardSize, and
@@ -457,7 +474,7 @@ class RegressionModel {
                     let raw = send("eye_data \(color) \(vertex)")
                     // Skip vertices whose eye origin is PASS (not an eye point)
                     guard !raw.contains("PASS") else { continue }
-                    eyeData![color]![vertex] = raw
+                    ed[color, default: [:]][vertex] = raw
                     // Check for "marginal  1" (value after "marginal" key)
                     for row in raw.components(separatedBy: "\n") {
                         if row.hasPrefix("marginal") {
@@ -467,7 +484,7 @@ class RegressionModel {
                         }
                     }
                 }
-                guard eyeData!["white"]![vertex] != nil || eyeData!["black"]![vertex] != nil
+                guard ed["white"]?[vertex] != nil || ed["black"]?[vertex] != nil
                 else { continue }
 
                 let halfRaw = send("half_eye_data \(vertex)")
@@ -483,17 +500,19 @@ class RegressionModel {
                 if isHalfEye { halfEyeData[vertex] = halfRaw }
 
                 for color in ["white", "black"] {
-                    guard eyeData![color]![vertex] != nil else { continue }
+                    guard ed[color]?[vertex] != nil else { continue }
                     if isMarginal.contains(color) {
-                        eyeTypes![color]![vertex] = "marginal"
+                        et[color, default: [:]][vertex] = "marginal"
                     } else if isHalfEye {
-                        eyeTypes![color]![vertex] = "half"
+                        et[color, default: [:]][vertex] = "half"
                     } else {
-                        eyeTypes![color]![vertex] = "proper"
+                        et[color, default: [:]][vertex] = "proper"
                     }
                 }
             }
         }
+        eyeData = ed
+        eyeTypes = et
     }
 
     func addInfluenceMarkup(settings: MarkupSettings) {
@@ -519,23 +538,10 @@ class RegressionModel {
             send("reg_genmove \(settings.moveColor)")
         }
 
-        let whatData: String
-        switch settings.influenceData {
-        case .regions:           whatData = "influence_regions"
-        case .territoryValue:    whatData = "territory_value"
-        case .whiteInfluence:    whatData = "white_influence"
-        case .blackInfluence:    whatData = "black_influence"
-        case .whiteStrength:     whatData = "white_strength"
-        case .blackStrength:     whatData = "black_strength"
-        case .whitePermeability: whatData = "white_permeability"
-        case .blackPermeability: whatData = "black_permeability"
-        case .whiteAttenuation:  whatData = "white_attenuation"
-        case .blackAttenuation:  whatData = "black_attenuation"
-        case .nonTerritory:      whatData = "non_territory"
-        }
+        let whatData = settings.influenceData.gtpCommand
 
         let raw = send("\(command) \(whatData)")
-        let values = raw.replacingOccurrences(of: "\n", with: " ")
+        let values = raw.replacing("\n", with: " ")
             .components(separatedBy: " ").filter { !$0.isEmpty }
         let n = goban.boardSize
         var k = 0
@@ -581,11 +587,7 @@ class RegressionModel {
     }
 
     func addReadingMarkup(settings: MarkupSettings) {
-        let needsTwo = settings.readingMode == .connection
-            || settings.readingMode == .semeai
-            || settings.readingMode == .owlDoesAttack
-            || settings.readingMode == .owlDoesDefend
-        if needsTwo, let fv = settings.firstVertex, !fv.isEmpty {
+        if settings.readingMode.needsTwoVertices, let fv = settings.firstVertex, !fv.isEmpty {
             goban.addSymbol(vertex: fv, symbol: .bigDot, color: .green)
         }
     }

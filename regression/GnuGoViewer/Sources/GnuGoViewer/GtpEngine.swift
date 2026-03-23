@@ -7,7 +7,6 @@ struct GtpResponse {
     var isFailure: Bool { status == "?" }
 }
 
-@Observable
 class GtpEngine {
     let commandLine: String
     private let callbackLock = NSLock()
@@ -48,7 +47,7 @@ class GtpEngine {
             while read(fd, &byte, 1) > 0 {
                 if byte[0] == UInt8(ascii: "\n") {
                     if let line = String(data: acc, encoding: .utf8) {
-                        let trimmed = line.replacingOccurrences(of: "\r", with: "")
+                        let trimmed = line.replacing("\r", with: "")
                         if !trimmed.isEmpty { self.traceCallback?(trimmed) }
                     }
                     acc = Data()
@@ -99,7 +98,7 @@ class GtpEngine {
                     accumulated = Data(); continue
                 }
                 accumulated = Data()
-                line = line.replacingOccurrences(of: "\r", with: "")
+                line = line.replacing("\r", with: "")
 
                 if firstLine {
                     if line.isEmpty { continue }
