@@ -741,7 +741,7 @@ extern int owl_node_limit;      /* maximum number of nodes considered */
 /* Maximum total OWL nodes across all dragons in one genmove call.
  * Normal: ~10,000. Exploding: millions. 500,000 is a safe bound.
  */
-#define GLOBAL_OWL_NODE_LIMIT  10000
+#define GLOBAL_OWL_NODE_LIMIT  500000
 
 /* Maximum total tactical reading nodes per genmove call.
  * Normal: ~100,000. Pathological: millions. 2,000,000 is a safe bound.

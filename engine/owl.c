@@ -111,7 +111,7 @@ static int local_owl_node_counter;
 static int global_owl_node_counter = 0;
 
 static int vital_pattern_hit_counter = 0;
-#define MAX_OWL_VITAL_HITS 3
+#define MAX_OWL_VITAL_HITS 5
 
 static struct local_owl_data *current_owl_data;
 static struct local_owl_data *other_owl_data;
@@ -1920,6 +1920,8 @@ owl_attack(int target, int *attack_point, int *certain, int *kworm)
   int wpos = NO_MOVE;
   int wid = MAX_GOAL_WORMS;
 
+  vital_pattern_hit_counter = 0;
+
   result_certain = 1;
   if (worm[target].unconditional_status == DEAD) {
     if (attack_point)
@@ -2576,6 +2578,8 @@ owl_defend(int target, int *defense_point, int *certain, int *kworm)
   int move = NO_MOVE;
   int wpos = NO_MOVE;
   int wid = MAX_GOAL_WORMS;
+
+  vital_pattern_hit_counter = 0;
 
   result_certain = 1;
   if (worm[target].unconditional_status == DEAD)
@@ -5465,6 +5469,8 @@ owl_does_defend(int move, int target, int *kworm)
   int wid = MAX_GOAL_WORMS;
   double start = 0.0;
 
+  vital_pattern_hit_counter = 0;
+
   if (debug & DEBUG_OWL_PERFORMANCE)
     start = gg_cputime();
 
@@ -7230,7 +7236,6 @@ void
 reset_owl_node_counter()
 {
   global_owl_node_counter = 0;
-  vital_pattern_hit_counter = 0;
 }
 
 
