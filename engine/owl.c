@@ -100,6 +100,8 @@ struct local_owl_data {
 
   /* This is used to organize the owl stack. */
   struct local_owl_data *restore_from;
+  /* Counter for vital pattern matchpat calls per branch path. */
+  int vital_pattern_hit_counter;
 };
 
 
@@ -109,6 +111,8 @@ static int result_certain;
 static int local_owl_node_counter;
 /* Node limitation. */
 static int global_owl_node_counter = 0;
+
+#define MAX_OWL_VITAL_HITS 20
 
 static struct local_owl_data *current_owl_data;
 static struct local_owl_data *other_owl_data;
@@ -1837,6 +1841,13 @@ reading_limit_reached(const char **live_reason, int this_variation_number)
     *live_reason = "owl node limit reached";
     return 1;
   }
+  if (global_owl_node_counter >= GLOBAL_OWL_NODE_LIMIT) {
+    result_certain = 0;
+    TRACE("%oVariation %d: ALIVE (global owl node limit reached)\n",
+	  this_variation_number);
+    *live_reason = "global owl node limit reached";
+    return 1;
+  }
   return 0;
 }
 
@@ -1909,6 +1920,7 @@ owl_attack(int target, int *attack_point, int *certain, int *kworm)
   int move = NO_MOVE;
   int wpos = NO_MOVE;
   int wid = MAX_GOAL_WORMS;
+
 
   result_certain = 1;
   if (worm[target].unconditional_status == DEAD) {
@@ -2567,6 +2579,7 @@ owl_defend(int target, int *defense_point, int *certain, int *kworm)
   int wpos = NO_MOVE;
   int wid = MAX_GOAL_WORMS;
 
+
   result_certain = 1;
   if (worm[target].unconditional_status == DEAD)
     return 0;
@@ -3054,16 +3067,24 @@ owl_estimate_life(struct local_owl_data *owl,
   matches_found = 0;
   memset(found_matches, 0, sizeof(found_matches));
 
-  if (get_level() >= 8) {
+  if (get_level() >= 8
+      && owl->vital_pattern_hit_counter <= MAX_OWL_VITAL_HITS) {
     memset(owl->safe_move_cache, 0, sizeof(owl->safe_move_cache));
     if (!does_attack) {
+      int before = matches_found;
       clear_owl_move_data(dummy_moves);
       matchpat(owl_shapes_callback, other,
 	       &owl_vital_apat_db, dummy_moves, owl->goal);
+      if (matches_found > before)
+	owl->vital_pattern_hit_counter++;
     }
-    else if (max_eyes(probable_eyes) >= 2)
+    else if (max_eyes(probable_eyes) >= 2) {
+      int before = matches_found;
       matchpat(owl_shapes_callback, other,
 	       &owl_vital_apat_db, vital_moves, owl->goal);
+      if (matches_found > before)
+	owl->vital_pattern_hit_counter++;
+    }
   }
 
   if ((debug & DEBUG_EYES) && (debug & DEBUG_OWL))
@@ -5246,7 +5267,8 @@ owl_reasons(int color)
 	&& DRAGON2(pos).owl_attack_point != NO_MOVE) {
       if (board[pos] == color) {
 	if (DRAGON2(pos).owl_defense_point != NO_MOVE) {
-	  if (DRAGON2(pos).owl_defense_code == LOSS) {
+	  if (DRAGON2(pos).owl_defense_code == LOSS
+	      && DRAGON2(pos).owl_defense_kworm != NO_MOVE) {
 	    add_loss_move(DRAGON2(pos).owl_defense_point, pos,
 			  DRAGON2(pos).owl_defense_kworm);
 	    DEBUG(DEBUG_OWL, "owl: %1m defends %1m with loss at move %d\n",
@@ -5375,7 +5397,8 @@ owl_reasons(int color)
       }
       else if (board[pos] == color
 	       && DRAGON2(pos).owl_defense_point != NO_MOVE
-	       && DRAGON2(pos).owl_defense_code == LOSS) {
+	       && DRAGON2(pos).owl_defense_code == LOSS
+	       && DRAGON2(pos).owl_defense_kworm != NO_MOVE) {
 	add_loss_move(DRAGON2(pos).owl_defense_point, pos,
 		      DRAGON2(pos).owl_defense_kworm);
 	DEBUG(DEBUG_OWL, "owl: %1m defends %1m with loss at move %d\n",
@@ -7011,6 +7034,7 @@ init_owl(struct local_owl_data **owl, int target1, int target2, int move,
   reduced_init_owl(owl, at_bottom_of_stack);
 
   local_owl_node_counter = 0;
+  (*owl)->vital_pattern_hit_counter = 0;
   (*owl)->lunches_are_current = 0;
   owl_mark_dragon(target1, target2, *owl, new_dragons);
   if (move != NO_MOVE)
@@ -7061,6 +7085,7 @@ do_push_owl(struct local_owl_data **owl)
    * previos stack entry or two steps back.
    */
   new_owl->restore_from = *owl;
+  new_owl->vital_pattern_hit_counter = (*owl)->vital_pattern_hit_counter;
 
   /* Finally move the *owl pointer. */
   *owl = new_owl;

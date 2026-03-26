@@ -9,6 +9,9 @@ gmon.out
 # implemented by a rule in regression/games/.gitignore
 *.sgf
 
+# Regression test output.
+regression/html/
+
 # Build files in the top directory.
 config.log
 config.status
