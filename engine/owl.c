@@ -1921,7 +1921,6 @@ owl_attack(int target, int *attack_point, int *certain, int *kworm)
   int wpos = NO_MOVE;
   int wid = MAX_GOAL_WORMS;
 
-
   result_certain = 1;
   if (worm[target].unconditional_status == DEAD) {
     if (attack_point)
@@ -2578,7 +2577,6 @@ owl_defend(int target, int *defense_point, int *certain, int *kworm)
   int move = NO_MOVE;
   int wpos = NO_MOVE;
   int wid = MAX_GOAL_WORMS;
-
 
   result_certain = 1;
   if (worm[target].unconditional_status == DEAD)

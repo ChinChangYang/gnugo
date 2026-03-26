@@ -148,9 +148,8 @@ examine_position(int how_much, int aftermath_play)
   }
 
   if (stones_on_board(BLACK | WHITE) != 0) {
-    if (NEEDS_UPDATE(initial_influence_examined)) {
+    if (NEEDS_UPDATE(initial_influence_examined))
       compute_worm_influence();
-    }
     if (how_much == EXAMINE_INITIAL_INFLUENCE) {
       verbose = save_verbose;
       gg_assert(test_gray_border() < 0);
