@@ -440,7 +440,7 @@ find_defense(int str, int *move)
   if (reading_node_counter >= GLOBAL_READING_NODE_LIMIT) {
     if (move)
       *move = NO_MOVE;
-    return WIN;  /* Conservatively assume defense succeeds */
+    return 0;  /* Node limit reached: pessimistically assume no defense */
   }
 
   origin = find_origin(str);

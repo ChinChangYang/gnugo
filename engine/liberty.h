@@ -746,7 +746,7 @@ extern int owl_node_limit;      /* maximum number of nodes considered */
 /* Maximum total tactical reading nodes per genmove call.
  * Normal: ~100,000. Pathological: millions. 2,000,000 is a safe bound.
  */
-#define GLOBAL_READING_NODE_LIMIT  2000000
+#define GLOBAL_READING_NODE_LIMIT  5000000
 extern int semeai_branch_depth;
 extern int semeai_branch_depth2;
 extern int semeai_node_limit;
