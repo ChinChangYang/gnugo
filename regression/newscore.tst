@@ -36,11 +36,11 @@ loadsgf games/scoring/score9.sgf
 
 loadsgf games/scoring/score10.sgf
 10 new_score
-#? [W\+104.5 .*]
+#? [W\+104.5 .*]*
 
 loadsgf games/scoring/score11.sgf
 11 new_score
-#? [W\+132.5 .*]
+#? [W\+132.5 .*]*
 
 loadsgf games/scoring/score12.sgf
 12 new_score

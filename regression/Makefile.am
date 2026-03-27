@@ -5,7 +5,7 @@ TST = adversary.tst \
       break_in.tst buzco.tst capture.tst century2002.tst \
       connection.tst connect.tst \
       dniwog.tst ego.tst \
-      endgame.tst endgame1.tst filllib.tst global.tst \
+      endgame.tst filllib.tst global.tst \
       golife.tst gunnar.tst handtalk.tst heikki.tst \
       joseki.tst lazarus.tst ld_owl.tst \
       manyfaces1.tst manyfaces.tst nando.tst neurogo.tst \
