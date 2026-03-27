@@ -859,8 +859,8 @@ struct worm_data {
 extern struct worm_data worm[BOARDMAX];
 
 /* Unconditionally meaningless moves. */
-int meaningless_black_moves[BOARDMAX];
-int meaningless_white_moves[BOARDMAX];
+extern int meaningless_black_moves[BOARDMAX];
+extern int meaningless_white_moves[BOARDMAX];
 
 /* Surround cache (see surround.c) */
 
