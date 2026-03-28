@@ -744,7 +744,7 @@ extern int owl_node_limit;      /* maximum number of nodes considered */
 #define GLOBAL_OWL_NODE_LIMIT  500000
 
 /* Maximum total tactical reading nodes per genmove call.
- * Normal: ~100,000. Pathological: millions. 2,000,000 is a safe bound.
+ * Normal: ~100,000. Pathological: millions. 5,000,000 is a safe bound.
  */
 #define GLOBAL_READING_NODE_LIMIT  5000000
 extern int semeai_branch_depth;
@@ -869,8 +869,8 @@ struct worm_data {
 extern struct worm_data worm[BOARDMAX];
 
 /* Unconditionally meaningless moves. */
-int meaningless_black_moves[BOARDMAX];
-int meaningless_white_moves[BOARDMAX];
+extern int meaningless_black_moves[BOARDMAX];
+extern int meaningless_white_moves[BOARDMAX];
 
 /* Surround cache (see surround.c) */
 
