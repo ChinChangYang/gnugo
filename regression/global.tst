@@ -1,6 +1,6 @@
 loadsgf golois/Aya991113-11.sgf
 1 reg_genmove black
-#? [B3|A4]*
+#? [B3|A4]
 
 loadsgf golois/Aya991113-12.sgf
 2 reg_genmove black
