@@ -11,6 +11,7 @@ gmon.out
 
 # Regression test output.
 regression/html/
+regression/results/
 
 # Build files in the top directory.
 config.log
