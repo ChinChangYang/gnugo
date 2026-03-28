@@ -1892,7 +1892,7 @@ order_connection_moves(int *moves, int str1, int str2, int color_to_move,
 
 /* Clear statistics. */
 void
-reset_connection_node_counter()
+reset_connection_node_counter(void)
 {
   global_connection_node_counter = 0;
 }
@@ -1900,7 +1900,7 @@ reset_connection_node_counter()
 
 /* Retrieve statistics. */
 int
-get_connection_node_counter()
+get_connection_node_counter(void)
 {
   return global_connection_node_counter;
 }

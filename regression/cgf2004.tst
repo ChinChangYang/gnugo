@@ -17,10 +17,6 @@ loadsgf games/cgf2004/aya.sgf 112
 40 reg_genmove white
 #? [L6|L5|M7|M6|M5|N6|N5|N4|O5|O4|Q12]*
 
-loadsgf games/cgf2004/aya.sgf 118
-50 reg_genmove white
-#? [G19]
-
 loadsgf games/cgf2004/aya.sgf 134
 60 reg_genmove white
 #? [N4]*

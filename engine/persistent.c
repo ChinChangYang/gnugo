@@ -560,7 +560,7 @@ init_cache(struct persistent_cache *cache)
  * Needs to be called only once at startup.
  */
 void
-persistent_cache_init()
+persistent_cache_init(void)
 {
   init_cache(&reading_cache);
   init_cache(&breakin_cache);
@@ -572,7 +572,7 @@ persistent_cache_init()
 
 /* Discards all persistent cache entries. */
 void
-clear_persistent_caches()
+clear_persistent_caches(void)
 {
   reading_cache.current_size = 0;
   connection_cache.current_size = 0;
@@ -586,7 +586,7 @@ clear_persistent_caches()
  * necessary for proper operation).
  */
 void
-purge_persistent_caches()
+purge_persistent_caches(void)
 {
   purge_persistent_cache(&reading_cache);
   purge_persistent_cache(&connection_cache);

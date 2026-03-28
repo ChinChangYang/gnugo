@@ -292,13 +292,13 @@ reading_cache_init(int bytes)
 
 /* Clear the cache for read results. */
 void
-reading_cache_clear()
+reading_cache_clear(void)
 {
   tt_clear(&ttable);
 }
 
 float
-reading_cache_default_size()
+reading_cache_default_size(void)
 {
   return DEFAULT_NUMBER_OF_CACHE_ENTRIES * sizeof(Hashentry) / 1024.0 / 1024.0;
 }

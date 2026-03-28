@@ -72,7 +72,7 @@ static void compute_scores(int use_chinese_rules);
  */
 
 void
-reset_engine()
+reset_engine(void)
 {
   /* To improve the reproducability of games, we restart the random
    * number generator with the same seed for each move. Thus we don't
@@ -97,6 +97,8 @@ reset_engine()
   /* Prepare our table of move reasons. */
   clear_move_reasons();
   clear_break_in_list();
+  reset_owl_node_counter();     /* reset global owl counter per genmove */
+  reset_reading_node_counter(); /* reset global reading counter per genmove */
 
   /* Set up depth values (see comments there for details). */
   set_depth_values(get_level(), 0);
@@ -126,9 +128,9 @@ examine_position(int how_much, int aftermath_play)
   int save_verbose = verbose;
 
   purge_persistent_caches();
-  
-  /* Don't print reading traces during make_worms and make_dragons unless 
-   * the user really wants it (verbose == 3). 
+
+  /* Don't print reading traces during make_worms and make_dragons unless
+   * the user really wants it (verbose == 3).
    */
   if (verbose == 1 || verbose == 2)
     --verbose;
@@ -509,9 +511,9 @@ do_genmove(int color, float pure_threat_value,
   gg_assert(stackp == 0);
 
   /* Review the move reasons and estimate move values. */
-  if (review_move_reasons(&move, value, color, 
-			  pure_threat_value, pessimistic_score, allowed_moves,
-			  use_thrashing_dragon_heuristics))
+  if (review_move_reasons(&move, value, color,
+                          pure_threat_value, pessimistic_score, allowed_moves,
+                          use_thrashing_dragon_heuristics))
     TRACE("Move generation likes %1m with value %f\n", move, *value);
   gg_assert(stackp == 0);
   time_report(1, "review move reasons", NO_MOVE, 1.0);
@@ -921,7 +923,7 @@ set_search_diamond(int pos)
 /* unmarks the entire board */
 
 void
-reset_search_mask()
+reset_search_mask(void)
 {
   memset(search_mask, 0, sizeof(search_mask));
 }

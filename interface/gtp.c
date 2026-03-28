@@ -272,7 +272,7 @@ gtp_start_response(int status)
 
 /* Finish a GTP response by writing a double newline and returning GTP_OK. */
 int
-gtp_finish_response()
+gtp_finish_response(void)
 {
   gtp_printf("\n\n");
   return GTP_OK;
@@ -309,7 +309,7 @@ gtp_failure(const char *format, ...)
 
 /* Write a panic message. */
 void
-gtp_panic()
+gtp_panic(void)
 {
   gtp_printf("! panic\n\n");
 }

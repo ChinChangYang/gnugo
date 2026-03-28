@@ -518,7 +518,7 @@ make_worms(void)
  */
 
 static void
-build_worms()
+build_worms(void)
 {
   int pos;
 
@@ -564,7 +564,7 @@ build_worms()
  */
 
 static void
-compute_effective_worm_sizes()
+compute_effective_worm_sizes(void)
 {
   do_compute_effective_worm_sizes(BLACK | WHITE, close_worms,
 				  number_close_worms, 3);
@@ -693,7 +693,7 @@ do_compute_effective_worm_sizes(int color, int (*cw)[MAX_CLOSE_WORMS],
  * unconditional territory for either player.
  */
 static void
-compute_unconditional_status()
+compute_unconditional_status(void)
 {
   int unconditional_territory[BOARDMAX];
   int pos;
@@ -731,7 +731,7 @@ compute_unconditional_status()
  */
 
 static void
-find_worm_attacks_and_defenses()
+find_worm_attacks_and_defenses(void)
 {
   int str;
   int k;
@@ -872,7 +872,7 @@ find_worm_attacks_and_defenses()
  */
 
 static void
-find_worm_threats()
+find_worm_threats(void)
 {
   int str;
   static int libs[MAXLIBS];
@@ -1729,7 +1729,7 @@ get_lively_stones(int color, signed char safe_stones[BOARDMAX])
 
 
 void
-compute_worm_influence()
+compute_worm_influence(void)
 {
   signed char safe_stones[BOARDMAX];
 

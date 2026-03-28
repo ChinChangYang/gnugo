@@ -357,7 +357,7 @@ decide_semeai(int apos, int bpos)
  */
 
 void
-decide_position()
+decide_position(void)
 {
   int pos;
   int move = NO_MOVE;

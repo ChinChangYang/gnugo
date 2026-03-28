@@ -719,7 +719,7 @@ do_trymove(int pos, int color, int ignore_ko)
  */
 
 void
-popgo()
+popgo(void)
 {
   undo_trymove();
   
@@ -757,7 +757,7 @@ popgo()
  */
 
 static void
-undo_trymove()
+undo_trymove(void)
 {
   gg_assert(change_stack_pointer - change_stack <= STACK_SIZE);
 
@@ -1028,7 +1028,7 @@ get_last_opponent_move(int color)
  * if the last move was a pass, PASS_MOVE is returned.
  */
 int
-get_last_move()
+get_last_move(void)
 {
   if (move_history_pointer == 0)
     return PASS_MOVE;
@@ -1040,7 +1040,7 @@ get_last_move()
  * found, EMPTY is returned.
  */
 int
-get_last_player()
+get_last_player(void)
 {
   if (move_history_pointer == 0)
     return EMPTY;
@@ -1404,13 +1404,13 @@ komaster_trymove(int pos, int color, const char *message, int str,
 }
 
 int
-get_komaster()
+get_komaster(void)
 {
   return komaster;
 }
 
 int
-get_kom_pos()
+get_kom_pos(void)
 {
   return kom_pos;
 }
@@ -3265,7 +3265,7 @@ stones_on_board(int color)
 
 /* Clear statistics. */
 void
-reset_trymove_counter()
+reset_trymove_counter(void)
 {
   trymove_counter = 0;
 }
@@ -3273,7 +3273,7 @@ reset_trymove_counter()
 
 /* Retrieve statistics. */
 int
-get_trymove_counter()
+get_trymove_counter(void)
 {
   return trymove_counter;
 }

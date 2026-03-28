@@ -1955,7 +1955,7 @@ time_report(int n, const char *occupation, int move, double mintime)
 }
 
 void
-clearstats()
+clearstats(void)
 {
   stats.nodes                    = 0;
   stats.read_result_entered      = 0;
@@ -1964,7 +1964,7 @@ clearstats()
 }
   
 void
-showstats()
+showstats(void)
 {
   gprintf("Nodes:                    %d\n", stats.nodes);
   gprintf("Read results entered:     %d\n", stats.read_result_entered);

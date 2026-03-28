@@ -1,4 +1,5 @@
-TST = 13x13b.tst 13x13.tst arb.tst arend2.tst arend.tst \
+TST = adversary.tst \
+      13x13b.tst 13x13.tst arb.tst arend2.tst arend.tst \
       arion.tst atari_atari.tst auto01.tst auto02.tst \
       auto03.tst auto04.tst auto_handtalk.tst blunder.tst \
       break_in.tst buzco.tst capture.tst century2002.tst \
@@ -42,6 +43,9 @@ test: all_batches
 	env RD=$(srcdir) $(srcdir)/eval.sh $^ $(GG_OPTIONS)
 
 13x13b: 13x13b.tst
+	env RD=$(srcdir) $(srcdir)/eval.sh $^ $(GG_OPTIONS)
+
+adversary: adversary.tst
 	env RD=$(srcdir) $(srcdir)/eval.sh $^ $(GG_OPTIONS)
 
 arb: arb.tst
@@ -345,6 +349,7 @@ fourth_batch:
 	$(srcdir)/regress.sh $(srcdir) strategy4.tst $(GG_OPTIONS)
 
 fifth_batch:
+	$(srcdir)/regress.sh $(srcdir) adversary.tst $(GG_OPTIONS)
 	$(srcdir)/regress.sh $(srcdir) owl1.tst $(GG_OPTIONS)
 	$(srcdir)/regress.sh $(srcdir) handtalk.tst $(GG_OPTIONS)
 	$(srcdir)/regress.sh $(srcdir) nngs2.tst $(GG_OPTIONS)

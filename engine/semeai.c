@@ -48,7 +48,7 @@ static int close_enough_for_proper_semeai(int apos, int bpos);
 #define MAX_DRAGONS 50
 
 void
-semeai()
+semeai(void)
 {
   int semeai_results_first[MAX_DRAGONS][MAX_DRAGONS];
   int semeai_results_second[MAX_DRAGONS][MAX_DRAGONS];
@@ -239,7 +239,7 @@ semeai()
  * include gunnar:42 and gifu03:2.
  */
 static void
-find_moves_to_make_seki()
+find_moves_to_make_seki(void)
 {
   int str;
   int defend_move;

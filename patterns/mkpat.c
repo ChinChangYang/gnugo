@@ -120,6 +120,7 @@ If output file is not specified, writes to stdout.\n\
 static const char VALID_PATTERN_CHARS[]     = ".XOxo,a!*?QY";
 static const char VALID_EDGE_CHARS[]        = "+-|";
 static const char VALID_CONSTRAINT_LABELS[] = "abcdefghijklmnpqrstuvwyzABCDEFGHIJKLMNPRSTUVWZ";
+#define NUM_VALID_CONSTRAINT_LABELS (sizeof(VALID_CONSTRAINT_LABELS) - 1)
 
 
 /* the offsets into the list are the ATT_* defined in patterns.h
@@ -1419,7 +1420,7 @@ generate_autohelper_code(int funcno, int number_of_params, int *labels)
     /* A common case. Just use the labels as parameters. */
     switch (number_of_params) {
     case 0:
-      code_pos += sprintf(code_pos, autohelper_functions[funcno].code);
+      code_pos += sprintf(code_pos, "%s", autohelper_functions[funcno].code);
       break;
     case 1:
       code_pos += sprintf(code_pos, autohelper_functions[funcno].code,
@@ -1668,7 +1669,7 @@ finish_constraint_and_action(void)
 		      prefix, patno);
 
   /* Generate variable declarations. */
-  for (i = 0; i < sizeof(VALID_CONSTRAINT_LABELS); i++) {
+  for (i = 0; i < NUM_VALID_CONSTRAINT_LABELS; i++) {
     int c = (int) VALID_CONSTRAINT_LABELS[i];
 
     if (label_coords[c][0] != -1)
@@ -1689,7 +1690,7 @@ finish_constraint_and_action(void)
     code_pos += sprintf(code_pos, "  UNUSED(action);\n");
   
   /* Generate coordinate transformations. */
-  for (i = 0; i < sizeof(VALID_CONSTRAINT_LABELS); i++) {
+  for (i = 0; i < NUM_VALID_CONSTRAINT_LABELS; i++) {
     int c = (int) VALID_CONSTRAINT_LABELS[i];
 
     if (label_coords[c][0] != -1) {
@@ -1709,6 +1710,15 @@ finish_constraint_and_action(void)
   /* move might be unused. Add an UNUSED statement to avoid warnings. */
   if (no_labels)
     code_pos += sprintf(code_pos, "\n  UNUSED(move);");
+
+  /* Add UNUSED statements for all labeled variables to suppress
+   * -Wunused-but-set-variable when a label is in the pattern board
+   * for an attribute (e.g. threatens_eye) but not in the helper condition. */
+  for (i = 0; i < NUM_VALID_CONSTRAINT_LABELS; i++) {
+    int c = (int) VALID_CONSTRAINT_LABELS[i];
+    if (label_coords[c][0] != -1)
+      code_pos += sprintf(code_pos, "\n  UNUSED(%c);", c);
+  }
 
   code_pos += sprintf(code_pos, "\n\n");
   if (have_constraint && have_action)

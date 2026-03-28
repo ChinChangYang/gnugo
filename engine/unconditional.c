@@ -29,6 +29,10 @@
 
 #include "liberty.h"
 
+/* Unconditionally meaningless moves. */
+int meaningless_black_moves[BOARDMAX];
+int meaningless_white_moves[BOARDMAX];
+
 /* Capture as many strings of the given color as we can. Played stones
  * are left on the board and the number of played stones is returned.
  * Strings marked in the exceptions array are excluded from capturing
@@ -663,7 +667,7 @@ unconditionally_meaningless_move(int pos, int color, int *replacement_move)
 }
 
 void
-clear_unconditionally_meaningless_moves()
+clear_unconditionally_meaningless_moves(void)
 {
   int pos;
   

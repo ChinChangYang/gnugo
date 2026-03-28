@@ -385,7 +385,7 @@ do_find_more_owl_attack_and_defense_moves(int color, int pos,
       if (dcode >= DRAGON2(dd).owl_defense_code) {
 	if (dcode == LOSS && kworm != NO_MOVE)
 	  add_loss_move(pos, dd, kworm);
-	else
+	else if (dcode != LOSS)
 	  add_owl_defense_move(pos, dd, dcode);
 	if (save_verbose)
 	  gprintf("Move at %1m upgraded to owl defense for %1m (%s).\n",
@@ -680,9 +680,9 @@ find_more_owl_attack_and_defense_moves(int color)
 	    int kworm = NO_MOVE;
 	    int dcode = owl_does_defend(pos2, pos, &kworm);
 	    if (dcode >= DRAGON2(pos).owl_defense_code) {
-	      if (dcode == LOSS)
+	      if (dcode == LOSS && kworm != NO_MOVE)
 		add_loss_move(pos2, pos, kworm);
-	      else
+	      else if (dcode != LOSS)
 		add_owl_defense_move(pos2, pos, dcode);
 	      if (save_verbose)
 	        gprintf("Move at %1m also owl defends %1m (%s).\n",
@@ -3060,7 +3060,7 @@ value_move_reasons(int pos, int color, float pure_threat_value,
      * the reasons for different moves in the trace outputs.
      */
     num_reasons = 0;
-    while (move[pos].reason[num_reasons] >= 0 && num_reasons < MAX_REASONS)
+    while (num_reasons < MAX_REASONS && move[pos].reason[num_reasons] >= 0)
       num_reasons++;
     gg_sort(move[pos].reason, num_reasons, sizeof(move[pos].reason[0]),
 	    compare_move_reasons);

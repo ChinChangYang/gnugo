@@ -362,6 +362,10 @@ attack(int str, int *move)
       || (liberties == 3 && stackp > depth))
     return 0;
 
+  /* Bail out if the global reading node limit has been reached. */
+  if (reading_node_counter >= GLOBAL_READING_NODE_LIMIT)
+    return 0;
+
   origin = find_origin(str);
   if (search_persistent_reading_cache(ATTACK, origin, &result, &the_move)) {
     if (move)
@@ -432,8 +436,15 @@ find_defense(int str, int *move)
     return WIN;
   }
 
+  /* Bail out if the global reading node limit has been reached. */
+  if (reading_node_counter >= GLOBAL_READING_NODE_LIMIT) {
+    if (move)
+      *move = NO_MOVE;
+    return 0;  /* Node limit reached: pessimistically assume no defense */
+  }
+
   origin = find_origin(str);
-  if (search_persistent_reading_cache(FIND_DEFENSE, origin, 
+  if (search_persistent_reading_cache(FIND_DEFENSE, origin,
 				      &result, &the_move)) {
     if (move)
       *move = the_move;
@@ -5496,7 +5507,7 @@ does_secure(int color, int move, int pos)
 
 /* Clear statistics. */
 void
-reset_reading_node_counter()
+reset_reading_node_counter(void)
 {
   reading_node_counter = 0;
 }
@@ -5504,7 +5515,7 @@ reset_reading_node_counter()
 
 /* Retrieve statistics. */
 int
-get_reading_node_counter()
+get_reading_node_counter(void)
 {
   return reading_node_counter;
 }
@@ -5514,7 +5525,7 @@ get_reading_node_counter()
 /* Draw the reading shadow, for debugging purposes */
 
 void
-draw_reading_shadow()
+draw_reading_shadow(void)
 {
   int i, j;
   int c = ' ';

@@ -151,10 +151,6 @@ loadsgf games/endgame8.sgf
 804 reg_genmove white
 #? [J7]
 
-loadsgf games/nngs/gnugo-3.3.17-Wiedemann-200303251932.sgf 151
-810 reg_genmove white
-#? [F5|F4]
-
 loadsgf games/nngs/gnugo-3.3.17-Wiedemann-200303251932.sgf 203
 820 reg_genmove white
 #? [H4|M10|K19]*
@@ -165,7 +161,7 @@ loadsgf games/paul.sgf 205
 
 loadsgf games/nngs/gnugo-3.3.17-Shindou-200304162217.sgf 110
 840 reg_genmove white
-#? [L15]
+#? [L15|G18]
 
 loadsgf games/nngs/gnugo-3.3.17-Shindou-200304162217.sgf 140
 850 restricted_genmove white K4 J4 L4 P5

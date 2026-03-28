@@ -123,7 +123,7 @@ make_dragons(int stop_before_owl)
    * amalgamation of dragons.
    */
   initialize_supplementary_dragon_data();
-  
+
   make_domains(black_eye, white_eye, 0);
 
   /* Find adjacent worms which can be easily captured: */
@@ -188,7 +188,7 @@ make_dragons(int stop_before_owl)
 
   if (stop_before_owl)
     return;
-  
+
   /* Determine life and death status of each dragon using the owl code
    * if necessary.
    */
@@ -254,12 +254,14 @@ make_dragons(int stop_before_owl)
 		/* Let's see whether the attacking move might be the right
 		 * defense:
 		 */
+		kworm = NO_MOVE;
 		dcode = owl_does_defend(DRAGON2(str).owl_attack_point,
-					str, NULL);
+					str, &kworm);
 		if (dcode != 0) {
 		  DRAGON2(str).owl_defense_point
 		    = DRAGON2(str).owl_attack_point;
 		  DRAGON2(str).owl_defense_code = dcode;
+		  DRAGON2(str).owl_defense_kworm = kworm;
 		}
 	      }
 	    }
@@ -437,7 +439,7 @@ make_dragons(int stop_before_owl)
 
 /* Find capturable worms adjacent to each dragon. */
 static void
-find_lunches()
+find_lunches(void)
 {
   int str;
   for (str = BOARDMIN; str < BOARDMAX; str++)
@@ -486,7 +488,7 @@ find_lunches()
  * black_vital_points and white_vital_points.
  */
 static void
-eye_computations()
+eye_computations(void)
 { 
   int str;
 
@@ -527,7 +529,7 @@ eye_computations()
  * according to the criteria explained in the comments below.
  */
 static void
-revise_inessentiality()
+revise_inessentiality(void)
 {
   int str;
   /* Revise essentiality of critical worms. Specifically, a critical
@@ -740,6 +742,8 @@ initialize_supplementary_dragon_data(void)
     dragon2[d].owl_defense_point        = NO_MOVE;
     dragon2[d].owl_defense_code         = 0;
     dragon2[d].owl_defense_certain      = 1;
+    dragon2[d].owl_attack_kworm         = NO_MOVE;
+    dragon2[d].owl_defense_kworm        = NO_MOVE;
     dragon2[d].owl_status               = UNCHECKED;
     dragon2[d].owl_threat_status        = UNCHECKED;
     dragon2[d].owl_second_attack_point  = NO_MOVE;
@@ -760,7 +764,7 @@ initialize_supplementary_dragon_data(void)
  * we can look for immediate adjacencies.
  */
 static void
-find_neighbor_dragons()
+find_neighbor_dragons(void)
 {
   int m, n;
   int pos;
@@ -1102,7 +1106,7 @@ get_alive_stones(int color, signed char safe_stones[BOARDMAX])
  * distance 5.
  */
 static void
-identify_thrashing_dragons()
+identify_thrashing_dragons(void)
 {
   int k;
   int dist;
@@ -1199,7 +1203,7 @@ set_strength_data(int color, signed char safe_stones[BOARDMAX],
 
 
 void
-compute_dragon_influence()
+compute_dragon_influence(void)
 {
   signed char safe_stones[BOARDMAX];
   float strength[BOARDMAX];
@@ -2214,7 +2218,7 @@ compute_dragon_weakness_value(int d)
  * subsequent re-run of the influence code.
  */
 void
-compute_refined_dragon_weaknesses()
+compute_refined_dragon_weaknesses(void)
 {
   int d;
 
@@ -2234,7 +2238,7 @@ compute_refined_dragon_weaknesses()
  * neighbouring dragons of the opponent.
  */
 void
-compute_strategic_sizes()
+compute_strategic_sizes(void)
 {
   float *bonus = calloc(number_of_dragons, sizeof(float));
   int d;
@@ -2446,7 +2450,7 @@ static int num_cuts = 0;
 static struct cut_data cut_list[MAX_CUTS];
 
 static void
-clear_cut_list()
+clear_cut_list(void)
 {
   num_cuts = 0;
 }

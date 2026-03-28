@@ -312,7 +312,6 @@ main(void)
 	int nj[4];
 	int nb[4];
 	int mx[MAXDIMEN][MAXDIMEN];
-	int count = 0;
 	int i = vi[l];
 	int j = vj[l];
 	
@@ -332,7 +331,6 @@ main(void)
 	  ni[neighbors[l]] = i-1;
 	  nj[neighbors[l]] = j;
 	  neighbors[l]++;
-	  count++;
 	  mx[i-1][j] = l;
 	}
 	
@@ -340,7 +338,6 @@ main(void)
 	  ni[neighbors[l]] = i+1;
 	  nj[neighbors[l]] = j;
 	  neighbors[l]++;
-	  count++;
 	  mx[i+1][j] = l;
 	}
 	

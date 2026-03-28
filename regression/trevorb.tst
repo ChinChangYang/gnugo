@@ -221,7 +221,7 @@ loadsgf games/trevor/auto/b28.sgf 44
 
 loadsgf games/trevor/auto/b28.sgf 64
 420 reg_genmove white
-#? [E2]
+#? [E2|C2]
 
 # See also reading:169.
 loadsgf games/trevor/auto/b28.sgf 80

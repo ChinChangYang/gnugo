@@ -31,9 +31,11 @@
 #endif
 
 
-#define USE_WINDOWS_SOCKET_CLUDGE		\
-  ((defined(_WIN32) || defined(_WIN32_WCE))	\
-   && defined(ENABLE_SOCKET_SUPPORT))
+#if (defined(_WIN32) || defined(_WIN32_WCE)) && defined(ENABLE_SOCKET_SUPPORT)
+#define USE_WINDOWS_SOCKET_CLUDGE 1
+#else
+#define USE_WINDOWS_SOCKET_CLUDGE 0
+#endif
 
 
 #if USE_WINDOWS_SOCKET_CLUDGE

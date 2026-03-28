@@ -9,6 +9,10 @@ gmon.out
 # implemented by a rule in regression/games/.gitignore
 *.sgf
 
+# Regression test output.
+regression/html/
+regression/results/
+
 # Build files in the top directory.
 config.log
 config.status
@@ -16,3 +20,12 @@ config.h
 stamp-h
 stamp-h1
 autom4te.cache
+
+# CMake build directory.
+build/
+
+# macOS metadata files.
+.DS_Store
+
+# Claude Code working directory.
+.claude/
