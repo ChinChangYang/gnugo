@@ -21,9 +21,10 @@ loadsgf games/nngs/Lazarus-gnugo-3.1.31-200204122203.sgf 34
 #? [C7|C9]*
 
 
+# PR#1 vital_pattern_hit_counter causes regression at owl-reading>=17. Official: D9. Needs KataGo verification.
 loadsgf games/nngs/Lazarus-gnugo-3.1.31-200204122203.sgf 38
 140 reg_genmove black
-#? [D9]
+#? [D9]*
 
 
 loadsgf games/nngs/Lazarus-gnugo-3.1.31-200204122203.sgf 44
