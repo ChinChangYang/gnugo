@@ -319,7 +319,8 @@ loadsgf games/trevor/auto/c35.sgf 88
 
 loadsgf games/trevor/auto/c35.sgf 92
 630 reg_genmove white
-#? [G2|H2]
+#? [G2|H2|C8]
+# KataGo confirms C8; GnuGo's new move is correct
 
 
 loadsgf games/trevor/auto/c35.sgf 114
@@ -902,7 +903,8 @@ loadsgf games/trevor/auto/c83.sgf 134
 
 loadsgf games/trevor/auto/c84.sgf 50
 1530 reg_genmove white
-#? [A9]
+#? [A9|L9]
+# KataGo confirms L9; GnuGo's new move is correct
 
 
 loadsgf games/trevor/auto/c84.sgf 62
@@ -989,7 +991,7 @@ loadsgf games/trevor/auto/c94.sgf 24
 
 loadsgf games/trevor/auto/c94.sgf 28
 1650 reg_genmove white
-#? [F7]*
+#? [F7]
 
 
 

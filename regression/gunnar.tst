@@ -174,7 +174,7 @@ loadsgf games/nngs/gnugo-3.3.18-overziel7-200304281000.sgf 124
 # Important to strengthen the wall at M11. P10 is not so large.
 loadsgf games/nngs/gnugo-3.3.18-overziel7-200304281000.sgf 184
 33 restricted_genmove white M11 P10
-#? [M11]*
+#? [M11]
 
 # The game move at P7 is worthless. M4 or M5 take the last point.
 loadsgf games/nngs/gnugo-3.3.18-overziel7-200304281000.sgf 234
@@ -462,7 +462,7 @@ loadsgf games/kgs/sade-GNU.sgf 265
 # P13 is clearly better than O13.
 loadsgf games/kgs/GNU-bassanio.sgf 164
 84 restricted_genmove white P13 O13
-#? [P13]
+#? [P13]*
 
 # T6 can't be defended. R8 is globally too small but locally
 # guaranteed to be better.

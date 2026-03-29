@@ -165,7 +165,7 @@ loadsgf games/nngs/ruud2d-gnugo-3.5.2gf1-200312241905.sgf 8
 # D3 is objectively best but dangerous. /ab
 loadsgf games/nngs/ruud2d-gnugo-3.5.2gf1-200312241905.sgf 20
 330 reg_genmove black
-#? [D3|F3]*
+#? [D3|F3]
 
 loadsgf games/nngs/ruud2d-gnugo-3.5.2gf1-200312241905.sgf 28
 340 reg_genmove black

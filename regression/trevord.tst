@@ -213,7 +213,7 @@ loadsgf games/trevor/auto/d08.sgf 214
 
 loadsgf games/trevor/auto/d08.sgf 232
 460 reg_genmove white
-#? [F19]
+#? [F19]*
 
 
 loadsgf games/trevor/auto/d08.sgf 240

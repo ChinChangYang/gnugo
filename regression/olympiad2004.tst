@@ -238,7 +238,7 @@ loadsgf games/olympiad2004/19x19/gnu-int.sgf 205
 # Black will break through somewhere after D4.
 loadsgf games/olympiad2004/9x9/gnu-int.sgf 9
 301 reg_genmove black
-#? [D4]*
+#? [D4]
 
 # H6 is bigger than J7.
 loadsgf games/olympiad2004/9x9/int-gnu.sgf 42

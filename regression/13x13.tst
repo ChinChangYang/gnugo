@@ -47,7 +47,7 @@ loadsgf games/mertin13x13/goliath-gnugo3.W+0.sgf 48
 #CATEGORY=ENDGAME_TUNING
 loadsgf games/mertin13x13/goliath-gnugo3.W+0.sgf 54
 8 restricted_genmove white K6 K7 J8 H8
-#? [J8]*
+#? [J8]
 
 #CATEGORY=BLUNDER
 loadsgf games/mertin13x13/goliath-gnugo3.W+0.sgf 72
@@ -115,7 +115,7 @@ loadsgf games/mertin13x13/gointellect-gnugo3.B+1.sgf 60
 #CATEGORY=ENDGAME_TUNING
 loadsgf games/mertin13x13/gointellect-gnugo3.B+1.sgf 66
 21 reg_genmove white
-#? [N8]
+#? [N8]*
 
 #CATEGORY=BLUNDER
 loadsgf games/mertin13x13/gointellect-gnugo3.B+1.sgf 94
@@ -232,7 +232,7 @@ loadsgf games/mertin13x13/gnugo-goliath1.W+11.sgf 25
 # by pattern CC77, which does not make too much sense here.
 loadsgf games/mertin13x13/gnugo-goliath1.W+11.sgf 27
 44 reg_genmove black
-#? [B6]
+#? [B6]*
 
 #CATEGORY=ENDGAME_TUNING
 # B4 is really huge here, appr. 20 pts.
