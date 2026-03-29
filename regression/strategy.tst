@@ -74,9 +74,10 @@ loadsgf games/incident108b.sgf 292
 # incident 121
 # E9 is not necessarily the best move since upper left weak too.
 # But the game move at R7 is not urgent!
+# KataGo v1.16.4 (kata1-b18c384nbt, 200v): D7 is preferred, E9 also acceptable.
 loadsgf games/incident121.sgf 24
 14 reg_genmove black
-#? [E9]
+#? [E9|D7]
 
 # incident 132
 loadsgf games/incident121.sgf 116

@@ -724,7 +724,7 @@ exponential_level(int a, double b, double e)
 /* Pattern based reading */
 #define OWL_DISTRUST_DEPTH    6
 #define OWL_BRANCH_DEPTH      8
-#define OWL_READING_DEPTH    18
+#define OWL_READING_DEPTH    20
 #define SEMEAI_BRANCH_DEPTH  12
 #define SEMEAI_BRANCH_DEPTH2  6
 
