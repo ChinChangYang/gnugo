@@ -420,7 +420,7 @@ loadsgf games/nngs/gnugo-3.5.3-Scorpion-200401080502.sgf 52
 #game move at L13 is awful
 loadsgf games/nngs/gnugo-3.5.3-Scorpion-200401080502.sgf 60
 970 reg_genmove white
-#? [E6|E5|C6]*
+#? [E6|E5|C6]
 
 loadsgf games/nngs/gnugo-3.5.3-Scorpion-200401080502.sgf 78
 980 reg_genmove white

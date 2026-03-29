@@ -108,7 +108,7 @@ loadsgf games/vaughn.sgf 44
 # ineffective too but can at least not be repeated...)
 loadsgf games/reading41.sgf 130
 279 restricted_genmove black A18 A16 B13 B12 E11
-#? [A16]
+#? [A16]*
 
 loadsgf games/nngs/takeda-gnugo-3.3.23-200307302010.sgf 10
 280 reg_genmove black
