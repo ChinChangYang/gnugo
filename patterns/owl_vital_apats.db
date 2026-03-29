@@ -1072,4 +1072,17 @@ bA*.
 ;&& !attack(b)
 
 
+Pattern VA59
+# nw 3-point edge space nakade: playing the center kills both potential eyes.
+# The eyespace evaluator misses this because the center (D9) is an interior
+# point, not a marginal point, so compute_eyes_pessimistic never marks it
+# as an attack point. See ld_owl:530.
+
+---
+.*.
+XX?
+
+:8,s,value(75)
+
+
 # END OF FILE
