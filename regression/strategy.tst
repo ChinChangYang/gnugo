@@ -44,7 +44,8 @@ loadsgf games/incident108b.sgf 172
 # incident 110
 loadsgf games/incident108b.sgf 176
 10 reg_genmove black
-#? [Q7]
+#? [Q7]*
+# KataGo confirms Q7; GnuGo plays Q8 after recursive_break budget fix (indirect regression)
 
 #CATEGORY=BAD_PROBLEM
 #DESCRIPTION=Not clear enough.

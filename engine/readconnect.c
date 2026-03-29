@@ -2867,13 +2867,13 @@ recursive_break(int str, const signed char goal[BOARDMAX], int *move,
   }
   
   if (nodes_connect > breakin_node_limit) {
-    SGFTRACE(PASS_MOVE, 0, "connection node limit reached");
-    return 0;
+    SGFTRACE(PASS_MOVE, WIN, "connection node limit reached");
+    return WIN;
   }
-  
+
   if (stackp > breakin_depth) {
-    SGFTRACE(PASS_MOVE, 0, "connection depth limit reached");
-    return 0;
+    SGFTRACE(PASS_MOVE, WIN, "connection depth limit reached");
+    return WIN;
   }
 
   str = find_origin(str);
@@ -2989,12 +2989,12 @@ recursive_block(int str, const signed char goal[BOARDMAX], int *move,
     SGFTRACE(PASS_MOVE, WIN, "connection node limit reached");
     return WIN;
   }
-  
+
   if (stackp > breakin_depth) {
     SGFTRACE(PASS_MOVE, WIN, "connection depth limit reached");
     return WIN;
   }
-  
+
   str = find_origin(str);
   if (stackp <= depth
       && tt_get(&ttable, BLOCK_OFF, str, NO_MOVE,
