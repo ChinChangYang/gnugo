@@ -83,6 +83,10 @@ and are used with permission.
 The SGF files in @file{regression/games/mertin13x13/} are copyright Stefan
 Mertin and are used with permission.
 
+The SGF file in @file{regression/games/adversary/} is from the
+KataGoVisualizer repository, copyright FAR AI, Inc and Center for
+Human-Compatible AI, and is included under the MIT License.
+
 The remaining SGF files are either copyright by the FSF or are in the public domain.
 
 

@@ -32,6 +32,7 @@
 #include "interface.h"
 #include "liberty.h"
 #include "gtp.h"
+#include "nnue.h"
 #include "gg_utils.h"
 
 /* Internal state that's not part of the engine. */
@@ -126,6 +127,9 @@ DECLARE(gtp_move_reasons);
 DECLARE(gtp_move_uncertainty);
 DECLARE(gtp_move_history);
 DECLARE(gtp_name);
+DECLARE(gtp_nnue_eval);
+DECLARE(gtp_nnue_load);
+DECLARE(gtp_nnue_mode);
 DECLARE(gtp_owl_attack);
 DECLARE(gtp_owl_connection_defends);
 DECLARE(gtp_owl_defend);
@@ -271,6 +275,9 @@ static struct gtp_command commands[] = {
   {"move_history",	      gtp_move_history},
   {"name",                    gtp_name},
   {"new_score",               gtp_estimate_score},
+  {"nnue_eval",               gtp_nnue_eval},
+  {"nnue_load",               gtp_nnue_load},
+  {"nnue_mode",               gtp_nnue_mode},
   {"orientation",     	      gtp_set_orientation},
   {"owl_attack",     	      gtp_owl_attack},
   {"owl_connection_defends",  gtp_owl_connection_defends},
@@ -4558,6 +4565,75 @@ gtp_draw_search_area(char *s)
   return gtp_finish_response();
 }
 
+
+
+/* Function:  Load NNUE weights from file.
+ * Arguments: filename
+ * Fails:     if file cannot be loaded
+ * Returns:   nothing
+ */
+static int
+gtp_nnue_load(char *s)
+{
+  char filename[256];
+  int n;
+
+  n = sscanf(s, "%255s", filename);
+  if (n < 1)
+    return gtp_failure("missing filename");
+
+  if (!nnue_load(filename))
+    return gtp_failure("failed to load NNUE weights");
+
+  return gtp_success("");
+}
+
+/* Function:  Toggle NNUE mode on or off.
+ * Arguments: on|off
+ * Fails:     if argument is not on or off
+ * Returns:   nothing
+ */
+static int
+gtp_nnue_mode(char *s)
+{
+  char arg[8];
+  int n;
+
+  n = sscanf(s, "%7s", arg);
+  if (n < 1)
+    return gtp_failure("missing argument (on or off)");
+
+  if (strcmp(arg, "on") == 0)
+    use_nnue = 1;
+  else if (strcmp(arg, "off") == 0)
+    use_nnue = 0;
+  else
+    return gtp_failure("argument must be on or off");
+
+  return gtp_success("");
+}
+
+/* Function:  Show NNUE evaluation of current position.
+ * Arguments: color to move
+ * Fails:     if color is invalid
+ * Returns:   NNUE evaluation in [-1, +1]
+ */
+static int
+gtp_nnue_eval(char *s)
+{
+  int color;
+  int n;
+  float eval;
+
+  n = gtp_decode_color(s, &color);
+  if (!n)
+    return gtp_failure("invalid color");
+
+  nnue_accumulator_refresh(color, detect_previous_pass());
+  eval = nnue_evaluate(color);
+
+  return gtp_success("%.4f", eval);
+}
 
 
 /*

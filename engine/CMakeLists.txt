@@ -41,6 +41,9 @@ SET(engine_STAT_SRCS
     shapes.c
     showbord.c
     surround.c
+    nnue.c
+    nnue_train.c
+    alphabeta.c
     unconditional.c
     utils.c
     value_moves.c

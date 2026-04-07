@@ -21,6 +21,20 @@ stamp-h
 stamp-h1
 autom4te.cache
 
+# Autotools generated files (run autoreconf -i to regenerate).
+configure
+aclocal.m4
+config.h.in
+stamp-h.in
+Makefile.in
+compile
+depcomp
+install-sh
+missing
+mkinstalldirs
+INSTALL
+doc/texinfo.tex
+
 # CMake build directory.
 build/
 

@@ -3,6 +3,7 @@
 ## Building
 
 ```sh
+autoreconf -i
 ./configure
 make -j$(sysctl -n hw.logicalcpu)
 ```

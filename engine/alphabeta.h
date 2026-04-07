@@ -21,35 +21,61 @@
  * Boston, MA 02111, USA.                                            *
 \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*-------------------------------------------------------------------------
- * interface.h
- * 	This file contains all headers for interfaces
- *-------------------------------------------------------------------------*/
+#ifndef _ALPHABETA_H_
+#define _ALPHABETA_H_
 
-#ifndef _PLAY_INTERFACE_H
-#define _PLAY_INTERFACE_H
+#include "hash.h"
 
-#include "gnugo.h"
-#include "sgftree.h"
+/* Transposition table entry flags */
+#define TT_EXACT   0
+#define TT_ALPHA   1  /* upper bound (fail-low) */
+#define TT_BETA    2  /* lower bound (fail-high) */
 
-void play_ascii(SGFTree *tree, Gameinfo *gameinfo, 
-		char *filename, char *until);
-void play_gtp(FILE *gtp_input, FILE *gtp_output, FILE *gtp_dump_commands,
-	      int gtp_initial_orientation);
-void play_gmp(Gameinfo *gameinfo, int simplified);
-void play_solo(Gameinfo *gameinfo, int benchmark);
-void play_replay(SGFTree *tree, int color_to_test);
+/* Transposition table size (power of 2) */
+#define TT_SIZE    (1 << 18)  /* 262144 entries */
+#define TT_MASK    (TT_SIZE - 1)
 
-void load_and_analyze_sgf_file(Gameinfo *gameinfo);
-void load_and_score_sgf_file(SGFTree *tree, Gameinfo *gameinfo,
-			     const char *scoringmode);
+typedef struct {
+  Hash_data hash;
+  float score;
+  int best_move;
+  short depth;
+  short flag;
+  int valid;
+} TTEntry;
 
-void play_train(int generations, int games_per_gen, int node_limit,
-		int deep_node_limit, const char *weights_file);
+typedef struct {
+  TTEntry *table;
+  int node_count;
+  int node_limit;
+  int consecutive_passes;
+  int search_aborted;
+} AlphaBetaState;
 
+/* Initialize the alpha-beta search state. Call once at startup. */
+void alphabeta_init(AlphaBetaState *state, int node_limit);
 
-#endif
+/* Free search state resources. */
+void alphabeta_free(AlphaBetaState *state);
 
+/* Clear the transposition table. */
+void alphabeta_clear_tt(AlphaBetaState *state);
+
+/* Generate a move using alpha-beta search with NNUE evaluation.
+ * color = side to move (BLACK or WHITE).
+ * node_limit = maximum number of nodes to search (0 = use state default).
+ * Returns the best move found (may be PASS_MOVE).
+ */
+int alphabeta_genmove(int color, int node_limit);
+
+/* Evaluate a position to a given depth using alpha-beta search.
+ * Returns the evaluation score in [-1, +1] from color's perspective.
+ * color = side to move.
+ * node_limit = search budget.
+ */
+float alphabeta_eval_position(int color, int node_limit);
+
+#endif  /* _ALPHABETA_H_ */
 
 /*
  * Local Variables:

@@ -11,6 +11,7 @@ SET(gnugo_SRCS
     play_gtp.c
     play_solo.c
     play_test.c
+    play_train.c
     gmp.c
     gtp.c
     )

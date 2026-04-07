@@ -11,7 +11,8 @@ AM_CPPFLAGS = \
 	-I$(top_srcdir)/utils
 
 noinst_HEADERS = cache.h gnugo.h hash.h clock.h readconnect.h \
-                 influence.h liberty.h move_reasons.h board.h
+                 influence.h liberty.h move_reasons.h board.h \
+                 nnue.h alphabeta.h nnue_train.h
 
 # preconfigured settings for various configurations
 noinst_LIBRARIES = libengine.a libboard.a
@@ -51,6 +52,9 @@ libengine_a_SOURCES = \
       shapes.c \
       showbord.c \
       surround.c \
+      nnue.c \
+      nnue_train.c \
+      alphabeta.c \
       unconditional.c \
       utils.c \
       value_moves.c \

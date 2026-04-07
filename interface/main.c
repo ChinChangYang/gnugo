@@ -55,6 +55,7 @@
 #include "interface.h"
 #include "sgftree.h"
 #include "random.h"
+#include "nnue.h"
 
 static void show_copyright(void);
 static void show_version(void);
@@ -161,7 +162,14 @@ enum {OPT_BOARDSIZE = 127,
       OPT_MC_GAMES_PER_LEVEL,
       OPT_MC_PATTERNS,
       OPT_MC_LIST_PATTERNS,
-      OPT_MC_LOAD_PATTERNS
+      OPT_MC_LOAD_PATTERNS,
+      OPT_NNUE,
+      OPT_NNUE_WEIGHTS,
+      OPT_NNUE_NODES,
+      OPT_TRAIN,
+      OPT_TRAIN_GENERATIONS,
+      OPT_TRAIN_GAMES,
+      OPT_NNUE_DEEP_NODES
 };
 
 /* names of playing modes */
@@ -187,7 +195,8 @@ enum mode {
   MODE_DECIDE_EYE,
   MODE_DECIDE_COMBINATION,
   MODE_DECIDE_SURROUNDED,
-  MODE_DECIDE_ORACLE
+  MODE_DECIDE_ORACLE,
+  MODE_TRAIN
 };
 
 
@@ -312,6 +321,13 @@ static struct gg_option const long_options[] =
   {"mc-patterns",    required_argument, 0, OPT_MC_PATTERNS},
   {"mc-list-patterns", no_argument,     0, OPT_MC_LIST_PATTERNS},
   {"mc-load-patterns", required_argument, 0, OPT_MC_LOAD_PATTERNS},
+  {"nnue",             no_argument,       0, OPT_NNUE},
+  {"nnue-weights",     required_argument, 0, OPT_NNUE_WEIGHTS},
+  {"nnue-nodes",       required_argument, 0, OPT_NNUE_NODES},
+  {"train",            no_argument,       0, OPT_TRAIN},
+  {"train-generations", required_argument, 0, OPT_TRAIN_GENERATIONS},
+  {"train-games",      required_argument, 0, OPT_TRAIN_GAMES},
+  {"nnue-deep-nodes",  required_argument, 0, OPT_NNUE_DEEP_NODES},
   {NULL, 0, NULL, 0}
 };
 
@@ -349,6 +365,10 @@ main(int argc, char *argv[])
 
   char mc_pattern_name[40] = "";
   char mc_pattern_filename[320] = "";
+
+  int train_generations = 100;
+  int train_games = 10000;
+  int nnue_deep_nodes = 1000;
 
   float memory = (float) DEFAULT_MEMORY; /* Megabytes used for hash table. */
 
@@ -670,6 +690,38 @@ main(int argc, char *argv[])
 	  exit(EXIT_FAILURE);
 	}
 	strcpy(mc_pattern_filename, gg_optarg);
+	break;
+
+      case OPT_NNUE:
+	use_nnue = 1;
+	break;
+
+      case OPT_NNUE_WEIGHTS:
+	if (strlen(gg_optarg) >= 256) {
+	  fprintf(stderr, "Too long filename for --nnue-weights.\n");
+	  exit(EXIT_FAILURE);
+	}
+	strcpy(nnue_weights_file, gg_optarg);
+	break;
+
+      case OPT_NNUE_NODES:
+	nnue_node_limit = atoi(gg_optarg);
+	break;
+
+      case OPT_TRAIN:
+	playmode = MODE_TRAIN;
+	break;
+
+      case OPT_TRAIN_GENERATIONS:
+	train_generations = atoi(gg_optarg);
+	break;
+
+      case OPT_TRAIN_GAMES:
+	train_games = atoi(gg_optarg);
+	break;
+
+      case OPT_NNUE_DEEP_NODES:
+	nnue_deep_nodes = atoi(gg_optarg);
 	break;
 
       case OPT_MODE: 
@@ -1011,6 +1063,15 @@ main(int argc, char *argv[])
 	      mc_pattern_name);
       fprintf(stderr, "Use \"--mc-list-patterns\" to list the available databases.\n");
       return EXIT_FAILURE;
+    }
+  }
+
+  /* Load NNUE weights if NNUE mode is enabled. */
+  if (use_nnue) {
+    if (!nnue_load(nnue_weights_file)) {
+      fprintf(stderr, "No NNUE weights found at %s, initializing randomly.\n",
+	      nnue_weights_file);
+      nnue_init_random(42);
     }
   }
 
@@ -1394,7 +1455,12 @@ main(int argc, char *argv[])
 
     break;
 
-  case MODE_ASCII:  
+  case MODE_TRAIN:
+    play_train(train_generations, train_games, nnue_node_limit,
+	       nnue_deep_nodes, nnue_weights_file);
+    break;
+
+  case MODE_ASCII:
   default:     
     if (mandated_color != EMPTY)
       gameinfo.computer_player = OTHER_COLOR(mandated_color);

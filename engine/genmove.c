@@ -28,6 +28,7 @@
 #include <string.h>
 
 #include "liberty.h"
+#include "nnue.h"
 #include "sgftree.h"
 #include "gg_utils.h"
 
@@ -250,6 +251,25 @@ genmove(int color, float *value, int *resign)
   int move = PASS_MOVE;
   if (resign)
     *resign = 0;
+
+  /* NNUE alpha-beta mode (9x9 only) */
+  if (use_nnue) {
+    if (board_size != NNUE_BOARD_SIZE) {
+      fprintf(stderr,
+	      "NNUE mode only supports %dx%d boards, "
+	      "falling through to default engine.\n",
+	      NNUE_BOARD_SIZE, NNUE_BOARD_SIZE);
+      use_nnue = 0;
+    }
+    else {
+      move = alphabeta_genmove(color, nnue_node_limit);
+      if (value)
+	*value = 1.0;
+      gg_assert(stackp == 0);
+      gg_assert(move == PASS_MOVE || ON_BOARD(move));
+      return move;
+    }
+  }
 
 #if ORACLE
   if (metamachine) {

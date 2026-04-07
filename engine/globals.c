@@ -136,6 +136,10 @@ int mc_games_per_level = 8000;  /* By default, use 8000 times the current
 				 * move generation is enabled.
 				 */
 
+int use_nnue = 0;               /* Use NNUE alpha-beta for move generation */
+int nnue_node_limit = 1000;     /* Node budget for NNUE alpha-beta search */
+char nnue_weights_file[256] = "nnue.bin"; /* NNUE weights file path */
+
 float best_move_values[10];
 int   best_moves[10];
 float white_score;

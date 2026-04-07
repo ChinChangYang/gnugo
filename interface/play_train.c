@@ -21,35 +21,31 @@
  * Boston, MA 02111, USA.                                            *
 \* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*-------------------------------------------------------------------------
- * interface.h
- * 	This file contains all headers for interfaces
- *-------------------------------------------------------------------------*/
-
-#ifndef _PLAY_INTERFACE_H
-#define _PLAY_INTERFACE_H
-
 #include "gnugo.h"
-#include "sgftree.h"
 
-void play_ascii(SGFTree *tree, Gameinfo *gameinfo, 
-		char *filename, char *until);
-void play_gtp(FILE *gtp_input, FILE *gtp_output, FILE *gtp_dump_commands,
-	      int gtp_initial_orientation);
-void play_gmp(Gameinfo *gameinfo, int simplified);
-void play_solo(Gameinfo *gameinfo, int benchmark);
-void play_replay(SGFTree *tree, int color_to_test);
+#include <stdio.h>
 
-void load_and_analyze_sgf_file(Gameinfo *gameinfo);
-void load_and_score_sgf_file(SGFTree *tree, Gameinfo *gameinfo,
-			     const char *scoringmode);
+#include "nnue.h"
+#include "nnue_train.h"
+#include "interface.h"
 
-void play_train(int generations, int games_per_gen, int node_limit,
-		int deep_node_limit, const char *weights_file);
+void
+play_train(int generations, int games_per_gen, int node_limit,
+	   int deep_node_limit, const char *weights_file)
+{
+  fprintf(stderr, "NNUE Training Mode\n");
+  fprintf(stderr, "  Generations:     %d\n", generations);
+  fprintf(stderr, "  Games/gen:       %d\n", games_per_gen);
+  fprintf(stderr, "  Shallow nodes:   %d\n", node_limit);
+  fprintf(stderr, "  Deep nodes:      %d\n", deep_node_limit);
+  fprintf(stderr, "  Weights file:    %s\n", weights_file);
+  fprintf(stderr, "\n");
 
+  nnue_train_run(generations, games_per_gen, node_limit,
+		 deep_node_limit, weights_file);
 
-#endif
-
+  fprintf(stderr, "\nTraining complete.\n");
+}
 
 /*
  * Local Variables:

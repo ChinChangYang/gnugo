@@ -222,6 +222,13 @@ extern int gtp_version;              /* version of Go Text Protocol */
 extern int use_monte_carlo_genmove;  /* use Monte Carlo move generation */
 extern int mc_games_per_level;       /* number of Monte Carlo simulations per level */
 
+extern int use_nnue;                 /* use NNUE alpha-beta for move generation */
+extern int nnue_node_limit;          /* node budget for NNUE alpha-beta search */
+extern char nnue_weights_file[];     /* NNUE weights file path */
+
+/* Alpha-beta search with NNUE evaluation */
+int alphabeta_genmove(int color, int node_limit);
+
 /* Mandatory values of reading parameters. Normally -1, if set
  * these override the values derived from the level. */
 extern int mandated_depth;
