@@ -44,8 +44,10 @@ void load_and_analyze_sgf_file(Gameinfo *gameinfo);
 void load_and_score_sgf_file(SGFTree *tree, Gameinfo *gameinfo,
 			     const char *scoringmode);
 
+struct NNUETrainConfig;
 void play_train(int generations, int games_per_gen, int node_limit,
-		int deep_node_limit, const char *weights_file);
+		int deep_node_limit, const char *weights_file,
+		const struct NNUETrainConfig *config);
 
 
 #endif

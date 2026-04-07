@@ -265,9 +265,9 @@ negamax(AlphaBetaState *state, int color, float alpha, float beta,
   if (depth <= 0 || state->node_count >= state->node_limit) {
     if (state->node_count >= state->node_limit)
       state->search_aborted = 1;
-    /* Refresh accumulator and evaluate */
-    nnue_accumulator_refresh(color, (last_move == PASS_MOVE) ? 1 : 0);
-    return nnue_evaluate(color);
+    /* Refresh quantized accumulator and evaluate */
+    nnue_qaccum_refresh(color, (last_move == PASS_MOVE) ? 1 : 0);
+    return nnue_evaluate_quantized(color);
   }
 
   /* Generate and search moves */
@@ -289,13 +289,13 @@ negamax(AlphaBetaState *state, int color, float alpha, float beta,
       }
       state->node_count++;
 
-      nnue_accum_push();
-      nnue_accumulator_refresh(OTHER_COLOR(color), 0);
+      nnue_qaccum_push();
+      nnue_qaccum_update_after_move(move, color);
 
       score = -negamax(state, OTHER_COLOR(color), -beta, -alpha,
 		       depth - 1, 0, move);
 
-      nnue_accum_pop();
+      nnue_qaccum_pop();
       popgo();
     }
 
@@ -352,7 +352,7 @@ alphabeta_genmove(int color, int node_limit)
   alphabeta_clear_tt(state);
 
   /* Refresh NNUE accumulators for root position */
-  nnue_accumulator_refresh(color, detect_previous_pass());
+  nnue_qaccum_refresh(color, detect_previous_pass());
 
   /* Iterative deepening */
   for (depth = 1; depth <= 100; depth++) {
@@ -389,13 +389,13 @@ alphabeta_genmove(int color, int node_limit)
 	  continue;
 	state->node_count++;
 
-	nnue_accum_push();
-	nnue_accumulator_refresh(OTHER_COLOR(color), 0);
+	nnue_qaccum_push();
+	nnue_qaccum_update_after_move(move, color);
 
 	score = -negamax(state, OTHER_COLOR(color), -beta, -alpha,
 			 depth - 1, 0, move);
 
-	nnue_accum_pop();
+	nnue_qaccum_pop();
 	popgo();
       }
 
@@ -444,7 +444,7 @@ alphabeta_eval_position(int color, int node_limit)
   state->search_aborted = 0;
   alphabeta_clear_tt(state);
 
-  nnue_accumulator_refresh(color, detect_previous_pass());
+  nnue_qaccum_refresh(color, detect_previous_pass());
 
   for (depth = 1; depth <= 100; depth++) {
     float score;
@@ -475,13 +475,13 @@ alphabeta_eval_position(int color, int node_limit)
 	  continue;
 	state->node_count++;
 
-	nnue_accum_push();
-	nnue_accumulator_refresh(OTHER_COLOR(color), 0);
+	nnue_qaccum_push();
+	nnue_qaccum_update_after_move(move, color);
 
 	score = -negamax(state, OTHER_COLOR(color), -beta, -alpha,
 			 depth - 1, 0, move);
 
-	nnue_accum_pop();
+	nnue_qaccum_pop();
 	popgo();
       }
 

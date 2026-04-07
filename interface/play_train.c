@@ -31,7 +31,8 @@
 
 void
 play_train(int generations, int games_per_gen, int node_limit,
-	   int deep_node_limit, const char *weights_file)
+	   int deep_node_limit, const char *weights_file,
+	   const NNUETrainConfig *config)
 {
   fprintf(stderr, "NNUE Training Mode\n");
   fprintf(stderr, "  Generations:     %d\n", generations);
@@ -39,10 +40,18 @@ play_train(int generations, int games_per_gen, int node_limit,
   fprintf(stderr, "  Shallow nodes:   %d\n", node_limit);
   fprintf(stderr, "  Deep nodes:      %d\n", deep_node_limit);
   fprintf(stderr, "  Weights file:    %s\n", weights_file);
+  if (config) {
+    fprintf(stderr, "  Optimizer:       Adam (lr=%.5f->%.5f)\n",
+	    config->lr_max, config->lr_min);
+    fprintf(stderr, "  Batch size:      %d\n", config->batch_size);
+    fprintf(stderr, "  Epochs/gen:      %d\n", config->num_epochs);
+    fprintf(stderr, "  Loss blend:      %.2f*search + %.2f*game\n",
+	    config->lambda, 1.0f - config->lambda);
+  }
   fprintf(stderr, "\n");
 
   nnue_train_run(generations, games_per_gen, node_limit,
-		 deep_node_limit, weights_file);
+		 deep_node_limit, weights_file, config);
 
   fprintf(stderr, "\nTraining complete.\n");
 }

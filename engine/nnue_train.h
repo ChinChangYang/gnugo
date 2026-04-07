@@ -26,39 +26,79 @@
 
 #include "nnue.h"
 
-/* Maximum training samples in the sliding window */
-#define NNUE_MAX_SAMPLES 50000
+#include <stdint.h>
 
-/* Training sample: board features + target score from deep search */
+/* Maximum training samples */
+#define NNUE_MAX_SAMPLES 500000
+
+/* Maximum active features per perspective (generous upper bound) */
+#define NNUE_MAX_ACTIVE_FEATURES 48
+
+/* Training sample: sparse features + search score + game outcome */
 typedef struct {
-  float stm_features[NNUE_INPUT_DIM];
-  float nstm_features[NNUE_INPUT_DIM];
-  float target;  /* deep search score in [-1, +1] for STM */
+  uint16_t stm_indices[NNUE_MAX_ACTIVE_FEATURES];
+  uint16_t nstm_indices[NNUE_MAX_ACTIVE_FEATURES];
+  uint8_t  num_stm;          /* number of active STM features */
+  uint8_t  num_nstm;         /* number of active NSTM features */
+  float    search_score;     /* deep search score in [-1, +1] for STM */
+  float    game_result;      /* Tromp-Taylor outcome from STM perspective */
 } NNUETrainSample;
 
 /* Gradient accumulators matching NNUEWeights layout */
 typedef struct {
   float l0_weight[NNUE_INPUT_DIM][NNUE_ACCUM_DIM];
   float l0_bias[NNUE_ACCUM_DIM];
-  float l1_weight[2 * NNUE_ACCUM_DIM][NNUE_HIDDEN1_DIM];
-  float l1_bias[NNUE_HIDDEN1_DIM];
-  float l2_weight[NNUE_HIDDEN2_DIM][NNUE_HIDDEN2_DIM];
+  float l1_weight[2 * NNUE_ACCUM_DIM][NNUE_FC1_OUT_DIM];
+  float l1_bias[NNUE_FC1_OUT_DIM];
+  float l2_weight[NNUE_FC2_IN_DIM][NNUE_HIDDEN2_DIM];
   float l2_bias[NNUE_HIDDEN2_DIM];
   float l3_weight[NNUE_HIDDEN2_DIM];
   float l3_bias;
 } NNUEGradients;
 
+/* Training hyperparameters */
+typedef struct NNUETrainConfig {
+  float lr_max;       /* max learning rate (default 0.001) */
+  float lr_min;       /* min learning rate (default 0.00001) */
+  float beta1;        /* Adam first moment decay (default 0.9) */
+  float beta2;        /* Adam second moment decay (default 0.999) */
+  float epsilon;      /* Adam numerical stability (default 1e-8) */
+  float lambda;       /* blended loss: lambda*search + (1-lambda)*game_result */
+  int   batch_size;   /* mini-batch size (default 1024) */
+  int   num_epochs;   /* epochs per generation (default 10) */
+  int   total_steps;  /* total batches across all epochs (computed) */
+} NNUETrainConfig;
+
+/* Adam optimizer state — same layout as NNUEGradients for m and v */
+typedef struct {
+  NNUEGradients m;    /* first moment (mean of gradients) */
+  NNUEGradients v;    /* second moment (mean of squared gradients) */
+  int t;              /* timestep counter */
+} NNUEAdamState;
+
 /* Run backpropagation for a single sample.
  * Accumulates gradients into grad.
+ * Uses blended target: lambda*search_score + (1-lambda)*game_result.
  * Returns the MSE loss for this sample.
  */
-float nnue_backward(const NNUETrainSample *sample, NNUEGradients *grad);
-
-/* Apply SGD update: weights -= lr * (grad / batch_size) */
-void nnue_sgd_update(NNUEGradients *grad, float lr, int batch_size);
+float nnue_backward(const NNUETrainSample *sample, NNUEGradients *grad,
+		    float lambda);
 
 /* Zero out all gradients */
 void nnue_grad_zero(NNUEGradients *grad);
+
+/* Initialize Adam optimizer state */
+void nnue_adam_init(NNUEAdamState *state);
+
+/* Apply Adam update with given learning rate */
+void nnue_adam_update(NNUEGradients *grad, NNUEAdamState *state,
+		      const NNUETrainConfig *config, float lr);
+
+/* Compute cosine-annealed learning rate */
+float nnue_cosine_lr(const NNUETrainConfig *config, int step);
+
+/* Initialize training config with defaults */
+void nnue_train_config_defaults(NNUETrainConfig *config);
 
 /* Run the full training pipeline.
  * generations = number of training generations
@@ -66,9 +106,11 @@ void nnue_grad_zero(NNUEGradients *grad);
  * node_limit = shallow search node limit for game play
  * deep_node_limit = deep search node limit for labeling
  * weights_file = path to save/load weights
+ * config = training hyperparameters (NULL for defaults)
  */
 void nnue_train_run(int generations, int games_per_gen, int node_limit,
-		    int deep_node_limit, const char *weights_file);
+		    int deep_node_limit, const char *weights_file,
+		    const NNUETrainConfig *config);
 
 #endif  /* _NNUE_TRAIN_H_ */
 

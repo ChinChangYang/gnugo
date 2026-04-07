@@ -24,13 +24,15 @@
 #ifndef _NNUE_H_
 #define _NNUE_H_
 
+#include <stdint.h>
+
 /* NNUE (Efficiently Updatable Neural Network) for 9x9 Go evaluation.
  *
- * Architecture:
- *   Input(649 sparse binary) -> Accumulator[128] (per perspective, clipped ReLU)
- *   Concat(STM[128], NSTM[128]) -> FC[256->32] (clipped ReLU)
- *   FC[32->32] (clipped ReLU)
- *   FC[32->1] (tanh output in [-1, +1])
+ * Architecture (v2, Stockfish-inspired):
+ *   Input(649 sparse binary) -> Accumulator[128] (per perspective, CReLU)
+ *   Concat(STM[128], NSTM[128]) -> FC1[256->33] (32 hidden + 1 skip)
+ *   CReLU(32) || SqrCReLU(32) -> FC2[64->32] (CReLU)
+ *   FC3[32->1] + skip -> tanh -> [-1, +1]
  *
  * Features per intersection (81 points on 9x9):
  *   0: own stone      1: opponent stone
@@ -47,7 +49,9 @@
 #define NNUE_NUM_GLOBAL   1
 #define NNUE_INPUT_DIM    (NNUE_NUM_POINTS * NNUE_FEAT_PER_PT + NNUE_NUM_GLOBAL) /* 649 */
 #define NNUE_ACCUM_DIM    128
-#define NNUE_HIDDEN1_DIM  32
+#define NNUE_FC1_OUT_DIM  33     /* 32 hidden + 1 skip connection output */
+#define NNUE_HIDDEN1_DIM  32     /* hidden neurons in FC1 (excluding skip) */
+#define NNUE_FC2_IN_DIM   64     /* CReLU(32) + SqrCReLU(32) concatenated */
 #define NNUE_HIDDEN2_DIM  32
 #define NNUE_OUTPUT_DIM   1
 
@@ -59,12 +63,12 @@ typedef struct {
   float l0_weight[NNUE_INPUT_DIM][NNUE_ACCUM_DIM];  /* 649 x 128 */
   float l0_bias[NNUE_ACCUM_DIM];                     /* 128 */
 
-  /* Layer 1: concat(stm_accum, nstm_accum) -> hidden1 */
-  float l1_weight[2 * NNUE_ACCUM_DIM][NNUE_HIDDEN1_DIM];  /* 256 x 32 */
-  float l1_bias[NNUE_HIDDEN1_DIM];                          /* 32 */
+  /* Layer 1: concat(stm_accum, nstm_accum) -> hidden1 + skip */
+  float l1_weight[2 * NNUE_ACCUM_DIM][NNUE_FC1_OUT_DIM];  /* 256 x 33 */
+  float l1_bias[NNUE_FC1_OUT_DIM];                          /* 33 */
 
-  /* Layer 2: hidden1 -> hidden2 */
-  float l2_weight[NNUE_HIDDEN2_DIM][NNUE_HIDDEN2_DIM];  /* 32 x 32 */
+  /* Layer 2: CReLU||SqrCReLU concat -> hidden2 */
+  float l2_weight[NNUE_FC2_IN_DIM][NNUE_HIDDEN2_DIM];  /* 64 x 32 */
   float l2_bias[NNUE_HIDDEN2_DIM];                       /* 32 */
 
   /* Layer 3: hidden2 -> output */
@@ -81,10 +85,38 @@ typedef struct {
   NNUEAccumulator black_accum;  /* Black's perspective accumulator */
 } NNUEAccumPair;
 
+/* ---- Quantization constants (Stockfish-style) ---- */
+#define NNUE_WEIGHT_SCALE_BITS  6
+#define NNUE_WEIGHT_SCALE       (1 << NNUE_WEIGHT_SCALE_BITS)  /* 64 */
+
+/* Quantized weight and accumulator types for fast integer inference */
+typedef struct {
+  int16_t l0_weight[NNUE_INPUT_DIM][NNUE_ACCUM_DIM];
+  int16_t l0_bias[NNUE_ACCUM_DIM];
+  int8_t  l1_weight[2 * NNUE_ACCUM_DIM][NNUE_FC1_OUT_DIM];
+  int32_t l1_bias[NNUE_FC1_OUT_DIM];
+  int8_t  l2_weight[NNUE_FC2_IN_DIM][NNUE_HIDDEN2_DIM];
+  int32_t l2_bias[NNUE_HIDDEN2_DIM];
+  int8_t  l3_weight[NNUE_HIDDEN2_DIM];
+  int32_t l3_bias;
+} NNUEQuantizedWeights;
+
+typedef struct {
+  int16_t values[NNUE_ACCUM_DIM];
+} NNUEQuantizedAccum;
+
+typedef struct {
+  NNUEQuantizedAccum white_accum;
+  NNUEQuantizedAccum black_accum;
+} NNUEQuantizedAccumPair;
+
 /* Global NNUE state */
 extern NNUEWeights nnue_weights;
 extern NNUEAccumPair nnue_accum_stack[NNUE_MAX_STACK];
 extern int nnue_accum_sp;
+extern NNUEQuantizedWeights nnue_qweights;
+extern NNUEQuantizedAccumPair nnue_qaccum_stack[NNUE_MAX_STACK];
+extern int nnue_qaccum_sp;
 
 /* Initialize NNUE weights with small random values */
 void nnue_init_random(unsigned int seed);
@@ -93,23 +125,38 @@ void nnue_init_random(unsigned int seed);
 int nnue_load(const char *filename);
 int nnue_save(const char *filename);
 
-/* Refresh accumulators from scratch for the current board position.
- * color = side to move (BLACK or WHITE).
- * previous_pass = 1 if the previous move was a pass, 0 otherwise.
+/* Quantize float weights to integer types for fast inference.
+ * Must be called after loading or updating float weights.
  */
+void nnue_quantize_weights(void);
+
+/* ---- Float accumulator operations (for training) ---- */
+
+/* Refresh accumulators from scratch for the current board position. */
 void nnue_accumulator_refresh(int color, int previous_pass);
-
-/* Push current accumulator state before trymove. */
 void nnue_accum_push(void);
-
-/* Pop accumulator state after popgo. */
 void nnue_accum_pop(void);
 
-/* Evaluate the current position from the side-to-move's perspective.
- * Returns a value in [-1, +1] where +1 = STM winning.
- * color = side to move.
- */
+/* Float evaluation (used during training forward pass) */
 float nnue_evaluate(int color);
+
+/* ---- Quantized accumulator operations (for search) ---- */
+
+/* Refresh quantized accumulators from scratch. */
+void nnue_qaccum_refresh(int color, int previous_pass);
+void nnue_qaccum_push(void);
+void nnue_qaccum_pop(void);
+
+/* Quantized evaluation — fast integer inference for alpha-beta search.
+ * Returns a value in [-1, +1] where +1 = STM winning.
+ */
+float nnue_evaluate_quantized(int color);
+
+/* Update quantized accumulators after a move is played.
+ * Call after trymove() + nnue_qaccum_push().
+ * Currently does full refresh; incremental delta is a future optimization.
+ */
+void nnue_qaccum_update_after_move(int move, int color);
 
 /* Tromp-Taylor area scoring.
  * Returns score from White's perspective (positive = White wins).

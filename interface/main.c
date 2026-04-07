@@ -56,6 +56,7 @@
 #include "sgftree.h"
 #include "random.h"
 #include "nnue.h"
+#include "nnue_train.h"
 
 static void show_copyright(void);
 static void show_version(void);
@@ -169,7 +170,11 @@ enum {OPT_BOARDSIZE = 127,
       OPT_TRAIN,
       OPT_TRAIN_GENERATIONS,
       OPT_TRAIN_GAMES,
-      OPT_NNUE_DEEP_NODES
+      OPT_NNUE_DEEP_NODES,
+      OPT_TRAIN_BATCH_SIZE,
+      OPT_TRAIN_EPOCHS,
+      OPT_TRAIN_LAMBDA,
+      OPT_TRAIN_LR
 };
 
 /* names of playing modes */
@@ -328,6 +333,10 @@ static struct gg_option const long_options[] =
   {"train-generations", required_argument, 0, OPT_TRAIN_GENERATIONS},
   {"train-games",      required_argument, 0, OPT_TRAIN_GAMES},
   {"nnue-deep-nodes",  required_argument, 0, OPT_NNUE_DEEP_NODES},
+  {"train-batch-size", required_argument, 0, OPT_TRAIN_BATCH_SIZE},
+  {"train-epochs",     required_argument, 0, OPT_TRAIN_EPOCHS},
+  {"train-lambda",     required_argument, 0, OPT_TRAIN_LAMBDA},
+  {"train-lr",         required_argument, 0, OPT_TRAIN_LR},
   {NULL, 0, NULL, 0}
 };
 
@@ -369,6 +378,7 @@ main(int argc, char *argv[])
   int train_generations = 100;
   int train_games = 10000;
   int nnue_deep_nodes = 1000;
+  NNUETrainConfig train_config;
 
   float memory = (float) DEFAULT_MEMORY; /* Megabytes used for hash table. */
 
@@ -383,7 +393,8 @@ main(int argc, char *argv[])
 
   sgftree_clear(&sgftree);
   gameinfo_clear(&gameinfo);
-  
+  nnue_train_config_defaults(&train_config);
+
   /* Weed through all of the command line options. */
   while ((i = gg_getopt_long(argc, argv, 
                             "-ab:B:d:D:EF:gh::K:l:L:M:m:o:O:p:r:fsStTvw",
@@ -724,7 +735,23 @@ main(int argc, char *argv[])
 	nnue_deep_nodes = atoi(gg_optarg);
 	break;
 
-      case OPT_MODE: 
+      case OPT_TRAIN_BATCH_SIZE:
+train_config.batch_size = atoi(gg_optarg);
+	break;
+
+      case OPT_TRAIN_EPOCHS:
+train_config.num_epochs = atoi(gg_optarg);
+	break;
+
+      case OPT_TRAIN_LAMBDA:
+train_config.lambda = (float)atof(gg_optarg);
+	break;
+
+      case OPT_TRAIN_LR:
+train_config.lr_max = (float)atof(gg_optarg);
+	break;
+
+      case OPT_MODE:
 	if (strcmp(gg_optarg, "ascii") == 0)
 	  playmode = MODE_ASCII;
 	else if (strcmp(gg_optarg, "gtp") == 0)
@@ -1457,7 +1484,7 @@ main(int argc, char *argv[])
 
   case MODE_TRAIN:
     play_train(train_generations, train_games, nnue_node_limit,
-	       nnue_deep_nodes, nnue_weights_file);
+	       nnue_deep_nodes, nnue_weights_file, &train_config);
     break;
 
   case MODE_ASCII:
